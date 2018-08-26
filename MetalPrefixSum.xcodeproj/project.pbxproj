@@ -611,7 +611,7 @@
 				INFOPLIST_FILE = iOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.helpurock.BasicTexturing;
+				PRODUCT_BUNDLE_IDENTIFIER = com.helpurock.MetalPrefixSum;
 				PRODUCT_NAME = MetalPrefixSum;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -631,7 +631,7 @@
 				INFOPLIST_FILE = iOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.helpurock.BasicTexturing;
+				PRODUCT_BUNDLE_IDENTIFIER = com.helpurock.MetalPrefixSum;
 				PRODUCT_NAME = MetalPrefixSum;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
