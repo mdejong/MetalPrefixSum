@@ -759,12 +759,12 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       
       ImageInputFrameConfig hcfg;
       
-//      hcfg = TEST_4x4_INCREASING1;
+      hcfg = TEST_4x4_INCREASING1;
 //      hcfg = TEST_4x4_INCREASING2;
 //      hcfg = TEST_4x8_INCREASING1;
 //      hcfg = TEST_2x8_INCREASING1;
 //      hcfg = TEST_6x4_NOT_SQUARE;
-      hcfg = TEST_8x8_IDENT;
+//      hcfg = TEST_8x8_IDENT;
 //      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
 //      hcfg = TEST_16x16_IDENT2;
@@ -1021,6 +1021,10 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       // Dump contents of prefix sum render
       
       //   MetalPrefixSumRenderFrame *mpsRenderFrame = self.mpsRenderFrame;
+      
+      id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
+      
+      [self dump8BitTexture:inputTexture label:@"inputTextureD1"];
       
       id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.reduceTextures[0];
       

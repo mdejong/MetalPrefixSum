@@ -112,9 +112,17 @@
   // Texture that holds block order input bytes
   
   {
-    // FIXME: pass 8x8 input to bytes here
+    assert(width == 4);
+    assert(height == 4);
     
-    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
+    uint8_t prefixSumBytes[] = {
+      0,   1,  2,  3,
+      4,   5,  6,  7,
+      8,   9, 10, 11,
+      12, 13, 14, 15
+    };
+    
+    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:prefixSumBytes usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
     renderFrame.inputBlockOrderTexture = txt;
   }
@@ -258,7 +266,14 @@
   if (renderPassDescriptor != nil)
   {
     // Reduce depth=1 output texture
+    id<MTLTexture> inputTexture = renderFrame.inputBlockOrderTexture;
     id<MTLTexture> outputTexture = (id<MTLTexture>) renderFrame.reduceTextures[0];
+    
+#if defined(DEBUG)
+    // Output should be 1/2 the width of input
+    assert((inputTexture.width / 2) == outputTexture.width);
+    assert(inputTexture.height == outputTexture.height);
+#endif // DEBUG
     
     renderPassDescriptor.colorAttachments[0].texture = outputTexture;
     renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
@@ -280,34 +295,8 @@
     [renderEncoder setVertexBuffer:mrc.identityVerticesBuffer
                             offset:0
                            atIndex:AAPLVertexInputIndexVertices];
-
-    [renderEncoder setFragmentTexture:renderFrame.inputBlockOrderTexture
-                              atIndex:0];
     
-    /*
-    
-    [renderEncoder setFragmentTexture:renderFrame.render12Zeros
-                              atIndex:0];
-    
-    [renderEncoder setFragmentBuffer:renderFrame.blockStartBitOffsets
-                              offset:0
-                             atIndex:0];
-    
-    // Read only buffer for huffman symbols and huffman lookup table
-    
-    [renderEncoder setFragmentBuffer:renderFrame.huffBuff
-                              offset:0
-                             atIndex:1];
-    
-    [renderEncoder setFragmentBuffer:renderFrame.huffSymbolTable1
-                              offset:0
-                             atIndex:2];
-    
-    [renderEncoder setFragmentBuffer:renderFrame.huffSymbolTable2
-                              offset:0
-                             atIndex:3];
-     
-    */
+    [renderEncoder setFragmentTexture:renderFrame.inputBlockOrderTexture atIndex:0];
     
     [renderEncoder setFragmentBuffer:renderFrame.renderTargetDimensionsAndBlockDimensionsUniform
                               offset:0
