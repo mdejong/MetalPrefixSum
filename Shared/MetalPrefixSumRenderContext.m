@@ -261,6 +261,12 @@
                  commandBuffer:(id<MTLCommandBuffer>)commandBuffer
                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
 {
+#if defined(DEBUG)
+  assert(mrc);
+  assert(commandBuffer);
+  assert(renderFrame);
+#endif // DEBUG
+  
   MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
   
   if (renderPassDescriptor != nil)
@@ -281,6 +287,11 @@
     
     id <MTLRenderCommandEncoder> renderEncoder =
     [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
+    
+#if defined(DEBUG)
+    assert(renderEncoder);
+#endif // DEBUG
+    
     renderEncoder.label = @"PrefixSumReduceD1";
     
     [renderEncoder pushDebugGroup: @"PrefixSumReduceD1"];

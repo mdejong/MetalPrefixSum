@@ -51,41 +51,14 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 // Main class performing the rendering
 @implementation AAPLRenderer
 {
-    // The device (aka GPU) we're using to render
-    id <MTLDevice> _device;
+  // The device (aka GPU) we're using to render
+  //id <MTLDevice> _device;
   
   // 12 and 16 symbol render pipelines
-  id<MTLRenderPipelineState> _render12PipelineState;
-  id<MTLRenderPipelineState> _render16PipelineState;
+  //id<MTLRenderPipelineState> _render12PipelineState;
+  //id<MTLRenderPipelineState> _render16PipelineState;
   
   // The Metal textures that will hold fragment shader output
-
-  id<MTLTexture> _render12Zeros;
-  
-  id<MTLTexture> _render12C0R0;
-  id<MTLTexture> _render12C1R0;
-  id<MTLTexture> _render12C2R0;
-  id<MTLTexture> _render12C3R0;
-  
-  id<MTLTexture> _render12C0R1;
-  id<MTLTexture> _render12C1R1;
-  id<MTLTexture> _render12C2R1;
-  id<MTLTexture> _render12C3R1;
-  
-  id<MTLTexture> _render12C0R2;
-  id<MTLTexture> _render12C1R2;
-  id<MTLTexture> _render12C2R2;
-  id<MTLTexture> _render12C3R2;
-  
-  id<MTLTexture> _render12C0R3;
-  id<MTLTexture> _render12C1R3;
-  id<MTLTexture> _render12C2R3;
-  id<MTLTexture> _render12C3R3;
-
-  id<MTLTexture> _render16C0;
-  id<MTLTexture> _render16C1;
-  id<MTLTexture> _render16C2;
-  id<MTLTexture> _render16C3;
   
   // This texture will contain the output of each symbol
   // render above with a "slice" that is the height of one
@@ -101,7 +74,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     id<MTLRenderPipelineState> _renderFromTexturePipelineState;
 
     // The command Queue from which we'll obtain command buffers
-    id<MTLCommandQueue> _commandQueue;
+    //id<MTLCommandQueue> _commandQueue;
 
     // Texture cache
     CVMetalTextureCacheRef _textureCache;
@@ -109,7 +82,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     id<MTLTexture> _render_texture;
   
     // The Metal buffer in which we store our vertex data
-    id<MTLBuffer> _vertices;
+    //id<MTLBuffer> _vertices;
 
     // The Metal buffer that will hold render dimensions
     id<MTLBuffer> _renderTargetDimensionsAndBlockDimensionsUniform;
@@ -163,7 +136,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   textureDescriptor.usage = MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead;
   
   // Create our texture object from the device and our descriptor
-  id<MTLTexture> texture = [_device newTextureWithDescriptor:textureDescriptor];
+  id<MTLTexture> texture = [self.mrc.device newTextureWithDescriptor:textureDescriptor];
   
   if (pixels != NULL) {
     NSUInteger bytesPerRow = textureDescriptor.width * sizeof(uint32_t);
@@ -251,7 +224,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   textureDescriptor.usage = MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead;
   
   // Create our texture object from the device and our descriptor
-  id<MTLTexture> texture = [_device newTextureWithDescriptor:textureDescriptor];
+  id<MTLTexture> texture = [self.mrc.device newTextureWithDescriptor:textureDescriptor];
   
   if (bytes != NULL) {
     NSUInteger bytesPerRow = textureDescriptor.width * sizeof(uint8_t);
@@ -635,7 +608,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   // Allocate a new buffer that accounts for read ahead space
   // and copy huffman encoded symbols into the allocated buffer.
   
-  _bitsBuff = [_device newBufferWithLength:encodedSymbolsNumBytes
+  _bitsBuff = [self.mrc.device newBufferWithLength:encodedSymbolsNumBytes
                                    options:MTLResourceStorageModeShared];
   
   memcpy(_bitsBuff.contents, encodedSymbolsPtr, encodedSymbolsNumBytes);
@@ -725,7 +698,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       
       mtkView.preferredFramesPerSecond = 30;
       
-      _device = mtkView.device;
+      //_device = mtkView.device;
 
       if (isCaptureRenderedTextureEnabled) {
         mtkView.framebufferOnly = false;
@@ -742,18 +715,18 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 
       // Texture Cache
       
-      {
-        // Disable flushing of textures
-        
-        NSDictionary *cacheAttributes = @{
-                                          (NSString*)kCVMetalTextureCacheMaximumTextureAgeKey: @(0),
-                                          };
-        
-//        NSDictionary *cacheAttributes = nil;
-        
-        CVReturn status = CVMetalTextureCacheCreate(kCFAllocatorDefault, (__bridge CFDictionaryRef)cacheAttributes, _device, nil, &_textureCache);
-        NSParameterAssert(status == kCVReturnSuccess && _textureCache != NULL);
-      }
+//      {
+//        // Disable flushing of textures
+//
+//        NSDictionary *cacheAttributes = @{
+//                                          (NSString*)kCVMetalTextureCacheMaximumTextureAgeKey: @(0),
+//                                          };
+//
+////        NSDictionary *cacheAttributes = nil;
+//
+//        CVReturn status = CVMetalTextureCacheCreate(kCFAllocatorDefault, (__bridge CFDictionaryRef)cacheAttributes, _device, nil, &_textureCache);
+//        NSParameterAssert(status == kCVReturnSuccess && _textureCache != NULL);
+//      }
       
       // Query size and byte data for input frame that will be rendered
       
@@ -805,7 +778,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       self->renderBlockWidth = blockWidth;
       self->renderBlockHeight = blockHeight;
       
-      _renderTargetDimensionsAndBlockDimensionsUniform = [_device newBufferWithLength:sizeof(RenderTargetDimensionsAndBlockDimensionsUniform)
+      _renderTargetDimensionsAndBlockDimensionsUniform = [self.mrc.device newBufferWithLength:sizeof(RenderTargetDimensionsAndBlockDimensionsUniform)
                                                      options:MTLResourceStorageModeShared];
       
       {
@@ -825,6 +798,41 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       [self.mpsrc setupRenderTextures:self.mrc renderSize:renderSize renderFrame:mpsrf];
       
       self.mpsRenderFrame = mpsrf;
+      
+      // Simple Render
+      
+      {
+        // Render to texture pipeline, simple pass through shader
+        
+        // Load the vertex function from the library
+        id <MTLFunction> vertexFunction = [self.mrc.defaultLibrary newFunctionWithName:@"vertexShader"];
+        
+        // Load the fragment function from the library
+        id <MTLFunction> fragmentFunction = [self.mrc.defaultLibrary newFunctionWithName:@"samplingPassThroughFragmentShader"];
+        
+        {
+          // Set up a descriptor for creating a pipeline state object
+          MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
+          pipelineStateDescriptor.label = @"Render From Texture Pipeline";
+          pipelineStateDescriptor.vertexFunction = vertexFunction;
+          pipelineStateDescriptor.fragmentFunction = fragmentFunction;
+          pipelineStateDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat;
+          //pipelineStateDescriptor.stencilAttachmentPixelFormat =  mtkView.depthStencilPixelFormat; // MTLPixelFormatStencil8
+          
+          NSError *error = nil;
+          
+          _renderFromTexturePipelineState = [self.mrc.device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
+                                                                                    error:&error];
+          if (!_renderFromTexturePipelineState)
+          {
+            // Pipeline State creation could fail if we haven't properly set up our pipeline descriptor.
+            //  If the Metal API validation is enabled, we can find out more information about what
+            //  went wrong.  (Metal API validation is enabled by default when a debug build is run
+            //  from Xcode)
+            NSLog(@"Failed to created pipeline state, error %@", error);
+          }
+        }
+      }
       
       _render_texture = [self makeBGRATexture:CGSizeMake(width,height) pixels:NULL];
 
@@ -956,7 +964,12 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 {
   // Create a new command buffer
   
-  id <MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+  id <MTLCommandBuffer> commandBuffer = [self.mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
   commandBuffer.label = @"RenderBGRACommand";
   
   // --------------------------------------------------------------------------
@@ -987,7 +1000,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     
     [renderEncoder setRenderPipelineState:_renderFromTexturePipelineState];
     
-    [renderEncoder setVertexBuffer:_vertices
+    [renderEncoder setVertexBuffer:self.mrc.identityVerticesBuffer
                             offset:0
                            atIndex:AAPLVertexInputIndexVertices];
     
