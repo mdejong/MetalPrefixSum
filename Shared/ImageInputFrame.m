@@ -1,10 +1,10 @@
-#import "HuffRenderFrame.h"
+#import "ImageInputFrame.h"
 
 #import "Util.h"
 
 #include <stdlib.h>
 
-@implementation HuffRenderFrame
+@implementation ImageInputFrame
 
 // Convert values to a NSData that contains bytes and append to array
 
@@ -97,10 +97,10 @@ appendXYCoordPixelsAsData(NSMutableArray * mArr, NSArray * values)
   return [NSData dataWithData:mData];
 }
 
-+ (HuffRenderFrame*) renderFrameForConfig:(HuffRenderFrameConfig)config
++ (ImageInputFrame*) frameForConfig:(ImageInputFrameConfig)config
 {
   
-  HuffRenderFrame *renderFrame = [[HuffRenderFrame alloc] init];
+  ImageInputFrame *renderFrame = [[ImageInputFrame alloc] init];
   
   switch (config) {
     case TEST_4x4_INCREASING1: {

@@ -20,7 +20,7 @@ Implementation of renderer class which perfoms Metal setup and per frame renderi
 
 #import "Eliasg.h"
 
-#import "HuffRenderFrame.h"
+#import "ImageInputFrame.h"
 
 #import "Util.h"
 
@@ -30,7 +30,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 
 @interface AAPLRenderer ()
 
-@property (nonatomic, retain) HuffRenderFrame *huffRenderFrame;
+@property (nonatomic, retain) ImageInputFrame *imageInputFrame;
 
 @end
 
@@ -734,29 +734,31 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       
       // Query size and byte data for input frame that will be rendered
       
-//      HuffRenderFrameConfig hcfg = TEST_4x4_INCREASING1;
-//      HuffRenderFrameConfig hcfg = TEST_4x4_INCREASING2;
-//      HuffRenderFrameConfig hcfg = TEST_4x8_INCREASING1;
-//      HuffRenderFrameConfig hcfg = TEST_2x8_INCREASING1;
-//      HuffRenderFrameConfig hcfg = TEST_6x4_NOT_SQUARE;
-//      HuffRenderFrameConfig hcfg = TEST_8x8_IDENT;
-//      HuffRenderFrameConfig hcfg = TEST_16x8_IDENT;
-//      HuffRenderFrameConfig hcfg = TEST_16x16_IDENT;
-//      HuffRenderFrameConfig hcfg = TEST_16x16_IDENT2;
-//      HuffRenderFrameConfig hcfg = TEST_16x16_IDENT3;
+      ImageInputFrameConfig hcfg;
       
-//        HuffRenderFrameConfig hcfg = TEST_8x8_IDENT_2048;
-//        HuffRenderFrameConfig hcfg = TEST_8x8_IDENT_4096;
+//      hcfg = TEST_4x4_INCREASING1;
+//      hcfg = TEST_4x4_INCREASING2;
+//      hcfg = TEST_4x8_INCREASING1;
+//      hcfg = TEST_2x8_INCREASING1;
+//      hcfg = TEST_6x4_NOT_SQUARE;
+//      hcfg = TEST_8x8_IDENT;
+//      hcfg = TEST_16x8_IDENT;
+//      hcfg = TEST_16x16_IDENT;
+//      hcfg = TEST_16x16_IDENT2;
+//      hcfg = TEST_16x16_IDENT3;
+      
+//        hcfg = TEST_8x8_IDENT_2048;
+//        hcfg = TEST_8x8_IDENT_4096;
 
-      //HuffRenderFrameConfig hcfg = TEST_LARGE_RANDOM;
-      //HuffRenderFrameConfig hcfg = TEST_IMAGE1;
-      //HuffRenderFrameConfig hcfg = TEST_IMAGE2;
-      //HuffRenderFrameConfig hcfg = TEST_IMAGE3;
-      HuffRenderFrameConfig hcfg = TEST_IMAGE4;
+      //hcfg = TEST_LARGE_RANDOM;
+      //hcfg = TEST_IMAGE1;
+      //hcfg = TEST_IMAGE2;
+      //hcfg = TEST_IMAGE3;
+      hcfg = TEST_IMAGE4;
       
-      HuffRenderFrame *renderFrame = [HuffRenderFrame renderFrameForConfig:hcfg];
+      ImageInputFrame *renderFrame = [ImageInputFrame frameForConfig:hcfg];
       
-      self.huffRenderFrame = renderFrame;
+      self.imageInputFrame = renderFrame;
       
       unsigned int width = renderFrame.renderWidth;
       unsigned int height = renderFrame.renderHeight;
@@ -1678,7 +1680,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     
     // Output of block padded shader write operation
     
-    if (isCaptureRenderedTextureEnabled && self.huffRenderFrame.capture && 0) {
+    if (isCaptureRenderedTextureEnabled && self.imageInputFrame.capture && 0) {
       [self dump4ByteTexture:_renderCombinedSlices label:@"_renderCombinedSlices"];
     }
     

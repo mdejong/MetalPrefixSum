@@ -20,13 +20,13 @@ typedef enum {
   TEST_IMAGE2,
   TEST_IMAGE3,
   TEST_IMAGE4,
-} HuffRenderFrameConfig;
+} ImageInputFrameConfig;
 
 // Header shared between C code here, which executes Metal API commands, and .metal files, which
 //   uses these types as inpute to the shaders
 #import "AAPLShaderTypes.h"
 
-@interface HuffRenderFrame : NSObject
+@interface ImageInputFrame : NSObject
 
 @property (nonatomic, assign) int renderWidth;
 @property (nonatomic, assign) int renderHeight;
@@ -40,6 +40,6 @@ typedef enum {
 
 // Get a specific configuration given a HuffRenderFrameConfig identifier
 
-+ (HuffRenderFrame*) renderFrameForConfig:(HuffRenderFrameConfig)config;
++ (ImageInputFrame*) frameForConfig:(ImageInputFrameConfig)config;
 
 @end
