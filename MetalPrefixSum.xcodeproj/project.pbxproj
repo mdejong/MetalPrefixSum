@@ -40,6 +40,9 @@
 		3C05292D2133318900A41138 /* MetalRenderFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529292133318900A41138 /* MetalRenderFrame.m */; };
 		3C05292E2133318900A41138 /* MetalRenderFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529292133318900A41138 /* MetalRenderFrame.m */; };
 		3C05292F2133318900A41138 /* MetalRenderFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529292133318900A41138 /* MetalRenderFrame.m */; };
+		3C0529322133379D00A41138 /* MetalPrefixSumRenderContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529302133379C00A41138 /* MetalPrefixSumRenderContext.m */; };
+		3C0529332133379D00A41138 /* MetalPrefixSumRenderContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529302133379C00A41138 /* MetalPrefixSumRenderContext.m */; };
+		3C0529342133379D00A41138 /* MetalPrefixSumRenderContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529302133379C00A41138 /* MetalPrefixSumRenderContext.m */; };
 		3C1C56B31FE4433F0024A55E /* ImageIpadSize.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */; };
 		3C4DC8FB1FDB495F00AABD25 /* ImageHuge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */; };
 		3C56AF9B1FEC70F000005C41 /* BigBridge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C56AF9A1FEC70F000005C41 /* BigBridge.png */; };
@@ -93,6 +96,8 @@
 		3C0529272133318800A41138 /* MetalRenderFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetalRenderFrame.h; sourceTree = "<group>"; };
 		3C0529282133318800A41138 /* MetalRenderContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetalRenderContext.h; sourceTree = "<group>"; };
 		3C0529292133318900A41138 /* MetalRenderFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MetalRenderFrame.m; sourceTree = "<group>"; };
+		3C0529302133379C00A41138 /* MetalPrefixSumRenderContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MetalPrefixSumRenderContext.m; sourceTree = "<group>"; };
+		3C0529312133379D00A41138 /* MetalPrefixSumRenderContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetalPrefixSumRenderContext.h; sourceTree = "<group>"; };
 		3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageIpadSize.png; sourceTree = "<group>"; };
 		3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageHuge.png; sourceTree = "<group>"; };
 		3C56AF9A1FEC70F000005C41 /* BigBridge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BigBridge.png; sourceTree = "<group>"; };
@@ -192,6 +197,8 @@
 				3CE5C0FA1FCCF46A0031E0EA /* ImageInputFrame.m */,
 				3C0529282133318800A41138 /* MetalRenderContext.h */,
 				3C0529262133318700A41138 /* MetalRenderContext.m */,
+				3C0529312133379D00A41138 /* MetalPrefixSumRenderContext.h */,
+				3C0529302133379C00A41138 /* MetalPrefixSumRenderContext.m */,
 				3C0529272133318800A41138 /* MetalRenderFrame.h */,
 				3C0529292133318900A41138 /* MetalRenderFrame.m */,
 				3AF7E9BE1EB64A46003BB06D /* AAPLRenderer.h */,
@@ -458,6 +465,7 @@
 				3AF7E9D31EB64A46003BB06D /* AAPLAppDelegate.m in Sources */,
 				3AF7E9CD1EB64A46003BB06D /* main.m in Sources */,
 				3CDE87A21FC0FAAC00EDB3FC /* Util.m in Sources */,
+				3C0529322133379D00A41138 /* MetalPrefixSumRenderContext.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -472,6 +480,7 @@
 				3AF7E9EC1EB64A46003BB06D /* AAPLAppDelegate.m in Sources */,
 				3C0529242133307300A41138 /* PassThroughShader.metal in Sources */,
 				3C05292E2133318900A41138 /* MetalRenderFrame.m in Sources */,
+				3C0529332133379D00A41138 /* MetalPrefixSumRenderContext.m in Sources */,
 				3AF7E9E61EB64A46003BB06D /* main.m in Sources */,
 				3C05292B2133318900A41138 /* MetalRenderContext.m in Sources */,
 			);
@@ -488,6 +497,7 @@
 				3AF7E9FC1EB64A46003BB06D /* main.m in Sources */,
 				3AF7EA0C1EB64A46003BB06D /* AAPLRenderer.m in Sources */,
 				3C0529252133307300A41138 /* PassThroughShader.metal in Sources */,
+				3C0529342133379D00A41138 /* MetalPrefixSumRenderContext.m in Sources */,
 				3C05292C2133318900A41138 /* MetalRenderContext.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
