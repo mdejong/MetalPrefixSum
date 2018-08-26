@@ -26,9 +26,18 @@ Implementation of renderer class which perfoms Metal setup and per frame renderi
 
 #import "elias_encode.h"
 
+#import "MetalRenderContext.h"
+#import "MetalRenderFrame.h"
+
 const static unsigned int blockDim = HUFF_BLOCK_DIM;
 
 @interface AAPLRenderer ()
+
+@property (nonatomic, retain) MTKView *mtkView;
+
+// A single render context contains refs to Metal specific
+
+@property (nonatomic, retain) MetalRenderContext *mrc;
 
 @property (nonatomic, retain) ImageInputFrame *imageInputFrame;
 
@@ -716,6 +725,11 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       if (isCaptureRenderedTextureEnabled) {
         mtkView.framebufferOnly = false;
       }
+      
+      self.mrc = [[MetalRenderContext alloc] init];
+      
+      self.mtkView = mtkView;
+      [self.mrc setupMetal:mtkView.device];
       
       // Texture Cache
       

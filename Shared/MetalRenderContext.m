@@ -15,8 +15,6 @@
 //   uses these types as inpute to the shaders
 #import "AAPLShaderTypes.h"
 
-#import "HuffmanLookupSymbol.h"
-
 // Private API
 
 @interface MetalRenderContext ()
