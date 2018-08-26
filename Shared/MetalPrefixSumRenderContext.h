@@ -5,152 +5,81 @@
 //
 //  See LICENSE for terms.
 //
-//  This module references Metal objects that are associated with
-//  a rendering context, like a view but are not defined on a
-//  render frame. There is 1 render context for N render frames.
+//  This module references Metal objects that are used to render
+//  a prefix sum result with a fragment shader using Metal.
 
 //@import MetalKit;
 #include <MetalKit/MetalKit.h>
 
-#import "MetalRenderFrame.h"
-
-// The max number of command buffers in flight
-#define MetalRenderContextMaxBuffersInFlight (3)
+@class MetalRenderContext;
+@class MetalPrefixSumRenderFrame;
 
 @interface MetalPrefixSumRenderContext : NSObject
 
-@property (nonatomic, retain) id<MTLDevice> device;
-@property (nonatomic, retain) id<MTLLibrary> defaultLibrary;
-@property (nonatomic, retain) id<MTLCommandQueue> commandQueue;
+// Prefix Sum Reduce step
 
-@property (nonatomic, retain) dispatch_semaphore_t inFlightSemaphore;
-
-@property (nonatomic, retain) id<MTLBuffer> identityVerticesBuffer;
-@property (nonatomic, assign) int identityNumVertices;
-
-@property (nonatomic, retain) id<MTLRenderPipelineState> renderToTexturePipelineState;
-@property (nonatomic, retain) id<MTLRenderPipelineState> renderFromTexturePipelineState;
+@property (nonatomic, retain) id<MTLRenderPipelineState> reduceSquarePipelineState;
+@property (nonatomic, retain) id<MTLRenderPipelineState> reduceRectPipelineState;
 
 #if defined(DEBUG)
 
-@property (nonatomic, retain) id<MTLRenderPipelineState> debugRenderXYoffsetTexturePipelineState;
-@property (nonatomic, retain) id<MTLRenderPipelineState> debugRenderIndexesTexturePipelineState;
-@property (nonatomic, retain) id<MTLRenderPipelineState> debugRenderLutiTexturePipelineState;
+//@property (nonatomic, retain) id<MTLRenderPipelineState> debugRenderXYoffsetTexturePipelineState;
 
 #endif // DEBUG
 
-@property (nonatomic, retain) id<MTLRenderPipelineState> render12PipelineState;
-@property (nonatomic, retain) id<MTLRenderPipelineState> render16PipelineState;
-
-@property (nonatomic, retain) id<MTLRenderPipelineState> renderCroppedIndexesPipelineState;
-
-@property (nonatomic, retain) id<MTLRenderPipelineState> renderCroppedLUTIndexesPipelineState;
-
-// Invoke this method once a MetalRenderFrame object has been created
-// to allocate and create metal resources with the given device instance.
-
-- (void) setupMetal:(nonnull id <MTLDevice>)device;
-
-// Create a MTLRenderPipelineDescriptor given a vertex and fragment shader
-
-- (id<MTLRenderPipelineState>) makePipeline:(MTLPixelFormat)pixelFormat
-                              pipelineLabel:(NSString*)pipelineLabel
-                             numAttachments:(int)numAttachments
-                         vertexFunctionName:(NSString*)vertexFunctionName
-                       fragmentFunctionName:(NSString*)fragmentFunctionName;
-
-// Util to allocate a BGRA 32 bits per pixel texture
-// with the given dimensions.
-
-- (id<MTLTexture>) makeBGRATexture:(CGSize)size pixels:(uint32_t*)pixels usage:(MTLTextureUsage)usage;
-
-// Allocate texture that contains an 8 bit int value in the range (0, 255)
-// represented by a half float value.
-
-- (id<MTLTexture>) make8bitTexture:(CGSize)size bytes:(uint8_t*)bytes usage:(MTLTextureUsage)usage;
-
-// Allocate 16 bit unsigned int texture
-
-- (id<MTLTexture>) make16bitTexture:(CGSize)size halfwords:(uint16_t*)halfwords usage:(MTLTextureUsage)usage;
-
 // Setup render pixpelines
 
-- (void) setupRenderPipelines;
+- (void) setupRenderPipelines:(MetalRenderContext*)mrc;
 
 // Huffman render textures initialization
 
-- (void) setupHuffRenderTextures:(CGSize)renderSize
-                     renderFrame:(MetalRenderFrame*)renderFrame;
+- (void) setupRenderTextures:(MetalRenderContext*)mrc
+                  renderSize:(CGSize)renderSize
+                 renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 // Specific render operations
+
+// Prefix sum render operation, this executes a single reduce step
+
+- (void) renderPrefixSumReduce:(MetalRenderContext*)mrc
+                 commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+                   renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 #if defined(DEBUG)
 
 // Implements debug render operation where (X,Y) values are written to a buffer
 
-- (void) debugRenderXYToTexture:(id<MTLCommandBuffer>)commandBuffer
-                    renderFrame:(MetalRenderFrame*)renderFrame;
-
-// Debug render INDEX values out as grayscale written into the pixel
-
-- (void) debugRenderIndexesToTexture:(id<MTLCommandBuffer>)commandBuffer
-                         renderFrame:(MetalRenderFrame*)renderFrame;
-
-// Debug render XY values out as 2 12 bit values
-
-- (void) debugRenderLutiToTexture:(id<MTLCommandBuffer>)commandBuffer
-                      renderFrame:(MetalRenderFrame*)renderFrame;
+//- (void) debugRenderXYToTexture:(id<MTLCommandBuffer>)commandBuffer
+//                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 #endif // DEBUG
 
-// Render pass 0 with huffman decoder
-
-- (void) renderHuff0:(id<MTLCommandBuffer>)commandBuffer
-         renderFrame:(MetalRenderFrame*)renderFrame;
-
-- (void) renderHuff1:(id<MTLCommandBuffer>)commandBuffer
-         renderFrame:(MetalRenderFrame*)renderFrame;
-
-- (void) renderHuff2:(id<MTLCommandBuffer>)commandBuffer
-         renderFrame:(MetalRenderFrame*)renderFrame;
-
-- (void) renderHuff3:(id<MTLCommandBuffer>)commandBuffer
-         renderFrame:(MetalRenderFrame*)renderFrame;
-
-// Render pass 4 with huffman decoder, this render writes 4 BGRA values and
-// does not write intermediate output values.
-
-- (void) renderHuff4:(id<MTLCommandBuffer>)commandBuffer
-         renderFrame:(MetalRenderFrame*)renderFrame;
-
-// Blit from N huffman textures so that each texture output
-// is blitted into the same output texture.
-
-- (void) blitRenderedTextures:(id<MTLCommandBuffer>)commandBuffer
-                  renderFrame:(MetalRenderFrame*)renderFrame;
+/*
 
 // Render cropped INDEXES as bytes to texture
 
 - (void) renderCroppedIndexesToTexture:(id<MTLCommandBuffer>)commandBuffer
-                    renderFrame:(MetalRenderFrame*)renderFrame;
+                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 // Render into the resizeable BGRA texture
 
 - (void) renderToTexture:(id<MTLCommandBuffer>)commandBuffer
-             renderFrame:(MetalRenderFrame*)renderFrame;
+             renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 // Render BGRA pixels to output texture.
 
 - (void) renderCroppedBGRAToTexture:(id<MTLCommandBuffer>)commandBuffer
-                        renderFrame:(MetalRenderFrame*)renderFrame;
+                        renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 // Render from the resizable BGRA output texture into the active view
 
 - (void) renderFromTexture:(id<MTLCommandBuffer>)commandBuffer
       renderPassDescriptor:(MTLRenderPassDescriptor*)renderPassDescriptor
-               renderFrame:(MetalRenderFrame*)renderFrame
+               renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
              viewportWidth:(int)viewportWidth
             viewportHeight:(int)viewportHeight;
+
+*/
 
 
 @end

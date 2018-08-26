@@ -27,7 +27,8 @@ Implementation of renderer class which perfoms Metal setup and per frame renderi
 #import "elias_encode.h"
 
 #import "MetalRenderContext.h"
-#import "MetalRenderFrame.h"
+#import "MetalPrefixSumRenderContext.h"
+#import "MetalPrefixSumRenderFrame.h"
 
 const static unsigned int blockDim = HUFF_BLOCK_DIM;
 
@@ -39,7 +40,11 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 
 @property (nonatomic, retain) MetalRenderContext *mrc;
 
+@property (nonatomic, retain) MetalPrefixSumRenderContext *mpsrc;
+
 @property (nonatomic, retain) ImageInputFrame *imageInputFrame;
+
+@property (nonatomic, retain) MetalPrefixSumRenderFrame *mpsRenderFrame;
 
 @end
 
@@ -714,7 +719,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     self = [super init];
     if(self)
     {
-      isCaptureRenderedTextureEnabled = 0;
+      isCaptureRenderedTextureEnabled = 1;
       
       mtkView.depthStencilPixelFormat = MTLPixelFormatInvalid;
       
@@ -728,9 +733,13 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       
       self.mrc = [[MetalRenderContext alloc] init];
       
+      self.mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+      
       self.mtkView = mtkView;
       [self.mrc setupMetal:mtkView.device];
       
+      [self.mpsrc setupRenderPipelines:self.mrc];
+
       // Texture Cache
       
       {
@@ -755,7 +764,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 //      hcfg = TEST_4x8_INCREASING1;
 //      hcfg = TEST_2x8_INCREASING1;
 //      hcfg = TEST_6x4_NOT_SQUARE;
-//      hcfg = TEST_8x8_IDENT;
+      hcfg = TEST_8x8_IDENT;
 //      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
 //      hcfg = TEST_16x16_IDENT2;
@@ -768,7 +777,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       //hcfg = TEST_IMAGE1;
       //hcfg = TEST_IMAGE2;
       //hcfg = TEST_IMAGE3;
-      hcfg = TEST_IMAGE4;
+      //hcfg = TEST_IMAGE4;
       
       ImageInputFrame *renderFrame = [ImageInputFrame frameForConfig:hcfg];
       
@@ -807,269 +816,19 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
         ptr->blockHeight = blockHeight;
       }
       
+      // Allocate prefix sum textures
+      
+      CGSize renderSize = CGSizeMake(width,height);
+      
+      MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+      
+      [self.mpsrc setupRenderTextures:self.mrc renderSize:renderSize renderFrame:mpsrf];
+      
+      self.mpsRenderFrame = mpsrf;
+      
       _render_texture = [self makeBGRATexture:CGSizeMake(width,height) pixels:NULL];
 
       // Render stages
-      
-      if ((1)) {
-        // Dummy input that is all zeros
-        _render12Zeros = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        
-        _render12C0R0 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C1R0 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C2R0 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C3R0 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-
-        _render12C0R1 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C1R1 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C2R1 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C3R1 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-
-        _render12C0R2 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C1R2 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C2R2 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C3R2 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-
-        _render12C0R3 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C1R3 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C2R3 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render12C3R3 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-
-        _render16C0 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render16C1 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render16C2 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-        _render16C3 = [self makeBGRATexture:CGSizeMake(blockWidth, blockHeight) pixels:NULL];
-
-        // Render into texture that is a multiple of (blockWidth, blockHeight)
-        
-        int combinedNumElemsWidth = 4096 / 512;
-        int maxLineWidth = blockWidth * combinedNumElemsWidth;
-        
-        int combinedNumElemsHeight = (blockWidth * 16) / maxLineWidth;
-        if (((blockWidth * 16) % maxLineWidth) != 0) {
-          combinedNumElemsHeight++;
-        }
-
-        int combinedWidth = blockWidth * combinedNumElemsWidth;
-        int combinedHeight = blockHeight * combinedNumElemsHeight;
-        
-        _renderCombinedSlices = [self makeBGRATexture:CGSizeMake(combinedWidth, combinedHeight) pixels:NULL];
-      }
-      
-        // Set up a simple MTLBuffer with our vertices which include texture coordinates
-      
-        static const AAPLVertex quadVertices[] =
-        {
-            // Positions, Texture Coordinates
-            { {  1,  -1 }, { 1.f, 0.f } },
-            { { -1,  -1 }, { 0.f, 0.f } },
-            { { -1,   1 }, { 0.f, 1.f } },
-
-            { {  1,  -1 }, { 1.f, 0.f } },
-            { { -1,   1 }, { 0.f, 1.f } },
-            { {  1,   1 }, { 1.f, 1.f } },
-        };
-
-        NSError *error = NULL;
-      
-      // FIXME: Would allocating with private storage mode make any diff here?
-      // What about putting a known fixed size buffer into constant memory space?
-      
-        // Create our vertex buffer, and initialize it with our quadVertices array
-        _vertices = [_device newBufferWithBytes:quadVertices
-                                         length:sizeof(quadVertices)
-                                        options:MTLResourceStorageModeShared];
-
-      // Calculate the number of vertices by dividing the byte length by the size of each vertex
-      _numVertices = sizeof(quadVertices) / sizeof(AAPLVertex);
-      
-      // For each block, there is one 32 bit number that stores the next bit
-      // offset into the huffman code buffer. Each successful code write operation
-      // will read from 1 to 16 bits and increment the counter for a specific block.
-      
-      _blockStartBitOffsets = [_device newBufferWithLength:sizeof(uint32_t)*(blockWidth*blockHeight)
-                                      options:MTLResourceStorageModeShared];
-      
-      // Load all the shader files with a metal file extension in the project
-      id<MTLLibrary> defaultLibrary = [_device newDefaultLibrary];
-
-      {
-        // Load the vertex function from the library
-        id <MTLFunction> vertexFunction = [defaultLibrary newFunctionWithName:@"vertexShader"];
-        
-        id <MTLFunction> fragmentFunction = [defaultLibrary newFunctionWithName:@"fragmentShaderB8W12"];
-        assert(fragmentFunction);
-        
-        // Set up a descriptor for creating a pipeline state object
-        MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
-        pipelineStateDescriptor.label = @"Decode 12 Pipeline";
-        pipelineStateDescriptor.vertexFunction = vertexFunction;
-        pipelineStateDescriptor.fragmentFunction = fragmentFunction;
-        
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat;
-        pipelineStateDescriptor.colorAttachments[1].pixelFormat = mtkView.colorPixelFormat;
-        pipelineStateDescriptor.colorAttachments[2].pixelFormat = mtkView.colorPixelFormat;
-        pipelineStateDescriptor.colorAttachments[3].pixelFormat = mtkView.colorPixelFormat;
-        
-        //pipelineStateDescriptor.stencilAttachmentPixelFormat =  mtkView.depthStencilPixelFormat; // MTLPixelFormatStencil8
-        
-        _render12PipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
-                                                                                  error:&error];
-        if (!_render12PipelineState)
-        {
-          // Pipeline State creation could fail if we haven't properly set up our pipeline descriptor.
-          //  If the Metal API validation is enabled, we can find out more information about what
-          //  went wrong.  (Metal API validation is enabled by default when a debug build is run
-          //  from Xcode)
-          NSLog(@"Failed to created pipeline state, error %@", error);
-        }
-      }
-
-      {
-        // Load the vertex function from the library
-        id <MTLFunction> vertexFunction = [defaultLibrary newFunctionWithName:@"vertexShader"];
-        assert(vertexFunction);
-        
-        id <MTLFunction> fragmentFunction = [defaultLibrary newFunctionWithName:@"fragmentShaderB8W16"];
-        assert(fragmentFunction);
-        
-        // Set up a descriptor for creating a pipeline state object
-        MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
-        pipelineStateDescriptor.label = @"Decode 16 Pipeline";
-        pipelineStateDescriptor.vertexFunction = vertexFunction;
-        pipelineStateDescriptor.fragmentFunction = fragmentFunction;
-        
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat;
-        pipelineStateDescriptor.colorAttachments[1].pixelFormat = mtkView.colorPixelFormat;
-        pipelineStateDescriptor.colorAttachments[2].pixelFormat = mtkView.colorPixelFormat;
-        pipelineStateDescriptor.colorAttachments[3].pixelFormat = mtkView.colorPixelFormat;
-        
-        //pipelineStateDescriptor.stencilAttachmentPixelFormat =  mtkView.depthStencilPixelFormat; // MTLPixelFormatStencil8
-        
-        _render16PipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
-                                                                         error:&error];
-        if (!_render16PipelineState)
-        {
-          // Pipeline State creation could fail if we haven't properly set up our pipeline descriptor.
-          //  If the Metal API validation is enabled, we can find out more information about what
-          //  went wrong.  (Metal API validation is enabled by default when a debug build is run
-          //  from Xcode)
-          NSLog(@"Failed to created pipeline state, error %@", error);
-        }
-      }
-      
-      {
-        // Render to texture pipeline, simple pass through shader
-        
-        // Load the vertex function from the library
-        id <MTLFunction> vertexFunction = [defaultLibrary newFunctionWithName:@"samplingPassThroughVertexShader"];
-
-        // Load the fragment function from the library
-        id <MTLFunction> fragmentFunction = [defaultLibrary newFunctionWithName:@"samplingPassThroughFragmentShader"];
-      
-      {
-        // Set up a descriptor for creating a pipeline state object
-        MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
-        pipelineStateDescriptor.label = @"Render From Texture Pipeline";
-        pipelineStateDescriptor.vertexFunction = vertexFunction;
-        pipelineStateDescriptor.fragmentFunction = fragmentFunction;
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = mtkView.colorPixelFormat;
-        //pipelineStateDescriptor.stencilAttachmentPixelFormat =  mtkView.depthStencilPixelFormat; // MTLPixelFormatStencil8
-        
-        _renderFromTexturePipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
-                                                                 error:&error];
-        if (!_renderFromTexturePipelineState)
-        {
-          // Pipeline State creation could fail if we haven't properly set up our pipeline descriptor.
-          //  If the Metal API validation is enabled, we can find out more information about what
-          //  went wrong.  (Metal API validation is enabled by default when a debug build is run
-          //  from Xcode)
-          NSLog(@"Failed to created pipeline state, error %@", error);
-        }
-      }
-      }
-      
-      {
-        // Load the vertex function from the library
-        id <MTLFunction> vertexFunction = [defaultLibrary newFunctionWithName:@"vertexShader"];
-        
-        // Load the fragment function from the library
-        
-        id <MTLFunction> fragmentFunction = [defaultLibrary newFunctionWithName:@"cropAndGrayscaleFromTexturesFragmentShader"];
-        assert(fragmentFunction);
-        
-        // Set up a descriptor for creating a pipeline state object
-        MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
-        pipelineStateDescriptor.label = @"Render To Texture Pipeline";
-        pipelineStateDescriptor.vertexFunction = vertexFunction;
-        pipelineStateDescriptor.fragmentFunction = fragmentFunction;
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-        //pipelineStateDescriptor.stencilAttachmentPixelFormat =  mtkView.depthStencilPixelFormat; // MTLPixelFormatStencil8
-        
-        _renderToTexturePipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
-                                                                 error:&error];
-        if (!_renderToTexturePipelineState)
-        {
-          // Pipeline State creation could fail if we haven't properly set up our pipeline descriptor.
-          //  If the Metal API validation is enabled, we can find out more information about what
-          //  went wrong.  (Metal API validation is enabled by default when a debug build is run
-          //  from Xcode)
-          NSLog(@"Failed to created pipeline state, error %@", error);
-        }
-        
-      }
-      
-        // Create the command queue
-        _commandQueue = [_device newCommandQueue];
-
-      _imageInputBytes = renderFrame.inputData;
-      
-      [self setupEliasgEncoding];
-      
-      // Zero out pixels / set to known init state
-      
-      if ((1))
-      {
-        int numBytes = (int) (_render12Zeros.width * _render12Zeros.height * sizeof(uint32_t));
-        uint32_t *pixels = malloc(numBytes);
-        
-#if defined(IMPL_DELTAS_AND_INIT_ZERO_DELTA_BEFORE_HUFF_ENCODING)
-        int numBytesBlockData = (int) _blockInitData.length;
-        int numPixelsInInitBlock = (int) (_render12Zeros.width * _render12Zeros.height);
-        assert(numBytesBlockData == numPixelsInInitBlock);
-        
-        // Each output pixel is written as BGRA where R stores the previous pixel value
-        // and the BG 16 bit value is zero.
-        
-        uint8_t *blockValPtr = (uint8_t *) _blockInitData.bytes;
-        
-        for ( int i = 0; i < numPixelsInInitBlock; i++ ) {
-          uint8_t blockInitVal = blockValPtr[i];
-          uint32_t pixel = (blockInitVal << 16) | (0);
-          pixels[i] = pixel;
-        }
-#else
-        // Init all lanes to zero
-        memset(pixels, 0, numBytes);
-#endif // IMPL_DELTAS_AND_INIT_ZERO_DELTA_BEFORE_HUFF_ENCODING
-        
-        {
-          NSUInteger bytesPerRow = _render12Zeros.width * sizeof(uint32_t);
-          
-          MTLRegion region = {
-            { 0, 0, 0 },                   // MTLOrigin
-            {_render12Zeros.width, _render12Zeros.height, 1} // MTLSize
-          };
-          
-          // Copy the bytes from our data object into the texture
-          [_render12Zeros replaceRegion:region
-                            mipmapLevel:0
-                              withBytes:pixels
-                            bytesPerRow:bytesPerRow];
-        }
-        
-        free(pixels);
-      }
       
     } // end of init if block
   
@@ -1160,6 +919,38 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   }
 }
 
+
+// Dump texture that contains simple grayscale pixel values
+
+- (void) dump8BitTexture:(id<MTLTexture>)outTexture
+                   label:(NSString*)label
+{
+  // Copy texture data into debug framebuffer, note that this include 2x scale
+  
+  int width = (int) outTexture.width;
+  int height = (int) outTexture.height;
+  
+  NSData *bytesData = [self.class getTextureBytes:outTexture];
+  uint8_t *bytesPtr = (uint8_t*) bytesData.bytes;
+  
+  // Dump output words as bytes
+  
+  if ((1)) {
+    fprintf(stdout, "%s as bytes\n", [label UTF8String]);
+    
+    for ( int row = 0; row < height; row++ ) {
+      for ( int col = 0; col < width; col++ ) {
+        int offset = (row * width) + col;
+        uint8_t v = bytesPtr[offset];
+        fprintf(stdout, "%3d ", v);
+      }
+      fprintf(stdout, "\n");
+    }
+    
+    fprintf(stdout, "done\n");
+  }
+}
+
 /// Called whenever the view needs to render a frame
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
@@ -1169,450 +960,13 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   commandBuffer.label = @"RenderBGRACommand";
   
   // --------------------------------------------------------------------------
-
-  int blockWidth = self->renderBlockWidth;
-  int blockHeight = self->renderBlockHeight;
   
-  // Render 0, write 12 symbols into 3 textures along with a bits consumed halfword
+  // Prefix sum setup and render steps
   
-  {
-  MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+  MetalPrefixSumRenderFrame *mpsRenderFrame = self.mpsRenderFrame;
   
-  if (renderPassDescriptor != nil)
-  {
-    renderPassDescriptor.colorAttachments[0].texture = _render12C0R0;
-    renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
-    renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-
-    renderPassDescriptor.colorAttachments[1].texture = _render12C1R0;
-    renderPassDescriptor.colorAttachments[1].loadAction = MTLLoadActionDontCare;
-    renderPassDescriptor.colorAttachments[1].storeAction = MTLStoreActionStore;
-
-    renderPassDescriptor.colorAttachments[2].texture = _render12C2R0;
-    renderPassDescriptor.colorAttachments[2].loadAction = MTLLoadActionDontCare;
-    renderPassDescriptor.colorAttachments[2].storeAction = MTLStoreActionStore;
-
-    renderPassDescriptor.colorAttachments[3].texture = _render12C3R0;
-    renderPassDescriptor.colorAttachments[3].loadAction = MTLLoadActionDontCare;
-    renderPassDescriptor.colorAttachments[3].storeAction = MTLStoreActionStore;
-    
-    id <MTLRenderCommandEncoder> renderEncoder =
-    [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-    renderEncoder.label = @"Render12R0";
-    
-    [renderEncoder pushDebugGroup: @"Render12R0"];
-    
-    // Set the region of the drawable to which we'll draw.
-    
-    MTLViewport mtlvp = {0.0, 0.0, blockWidth, blockHeight, -1.0, 1.0 };
-    [renderEncoder setViewport:mtlvp];
-    
-    [renderEncoder setRenderPipelineState:_render12PipelineState];
-    
-    [renderEncoder setVertexBuffer:_vertices
-                            offset:0
-                           atIndex:AAPLVertexInputIndexVertices];
-    
-    [renderEncoder setFragmentTexture:_render12Zeros
-                              atIndex:0];
-    
-    [renderEncoder setFragmentBuffer:_blockStartBitOffsets
-                       offset:0
-                      atIndex:0];
-    
-    [renderEncoder setFragmentBuffer:_bitsBuff
-                       offset:0
-                      atIndex:1];
-    
-    [renderEncoder setFragmentBuffer:_renderTargetDimensionsAndBlockDimensionsUniform
-                              offset:0
-                             atIndex:2];
-
-    // Draw the 3 vertices of our triangle
-    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                      vertexStart:0
-                      vertexCount:_numVertices];
-    
-    [renderEncoder popDebugGroup]; // RenderToTexture
-    
-    [renderEncoder endEncoding];
-  }
-    
-  }
-
-  // Render 1, write 12 symbols into 3 textures along with a bits consumed halfword
+  [self.mpsrc renderPrefixSumReduce:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame];
   
-  {
-    MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    
-    if (renderPassDescriptor != nil)
-    {
-      renderPassDescriptor.colorAttachments[0].texture = _render12C0R1;
-      renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[1].texture = _render12C1R1;
-      renderPassDescriptor.colorAttachments[1].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[1].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[2].texture = _render12C2R1;
-      renderPassDescriptor.colorAttachments[2].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[2].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[3].texture = _render12C3R1;
-      renderPassDescriptor.colorAttachments[3].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[3].storeAction = MTLStoreActionStore;
-      
-      id <MTLRenderCommandEncoder> renderEncoder =
-      [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-      renderEncoder.label = @"Render12R1";
-      
-      [renderEncoder pushDebugGroup: @"Render12R1"];
-      
-      // Set the region of the drawable to which we'll draw.
-      
-      MTLViewport mtlvp = {0.0, 0.0, blockWidth, blockHeight, -1.0, 1.0 };
-      [renderEncoder setViewport:mtlvp];
-      
-      [renderEncoder setRenderPipelineState:_render12PipelineState];
-      
-      [renderEncoder setVertexBuffer:_vertices
-                              offset:0
-                             atIndex:AAPLVertexInputIndexVertices];
-      
-      [renderEncoder setFragmentTexture:_render12C3R0
-                                atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_blockStartBitOffsets
-                                offset:0
-                               atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_bitsBuff
-                                offset:0
-                               atIndex:1];
-      
-      [renderEncoder setFragmentBuffer:_renderTargetDimensionsAndBlockDimensionsUniform
-                                offset:0
-                               atIndex:2];
-      
-      // Draw the 3 vertices of our triangle
-      [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                        vertexStart:0
-                        vertexCount:_numVertices];
-      
-      [renderEncoder popDebugGroup]; // RenderToTexture
-      
-      [renderEncoder endEncoding];
-    }
-  }
-
-  // render 2
-  
-  {
-    MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    
-    if (renderPassDescriptor != nil)
-    {
-      renderPassDescriptor.colorAttachments[0].texture = _render12C0R2;
-      renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[1].texture = _render12C1R2;
-      renderPassDescriptor.colorAttachments[1].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[1].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[2].texture = _render12C2R2;
-      renderPassDescriptor.colorAttachments[2].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[2].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[3].texture = _render12C3R2;
-      renderPassDescriptor.colorAttachments[3].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[3].storeAction = MTLStoreActionStore;
-      
-      id <MTLRenderCommandEncoder> renderEncoder =
-      [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-      renderEncoder.label = @"Render12R2";
-      
-      [renderEncoder pushDebugGroup: @"Render12R2"];
-      
-      // Set the region of the drawable to which we'll draw.
-      
-      MTLViewport mtlvp = {0.0, 0.0, blockWidth, blockHeight, -1.0, 1.0 };
-      [renderEncoder setViewport:mtlvp];
-      
-      [renderEncoder setRenderPipelineState:_render12PipelineState];
-      
-      [renderEncoder setVertexBuffer:_vertices
-                              offset:0
-                             atIndex:AAPLVertexInputIndexVertices];
-      
-      [renderEncoder setFragmentTexture:_render12C3R1
-                                atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_blockStartBitOffsets
-                                offset:0
-                               atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_bitsBuff
-                                offset:0
-                               atIndex:1];
-      
-      [renderEncoder setFragmentBuffer:_renderTargetDimensionsAndBlockDimensionsUniform
-                                offset:0
-                               atIndex:2];
-      
-      // Draw the 3 vertices of our triangle
-      [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                        vertexStart:0
-                        vertexCount:_numVertices];
-      
-      [renderEncoder popDebugGroup]; // RenderToTexture
-      
-      [renderEncoder endEncoding];
-    }
-  }
-
-  // render 3
-  
-  {
-    MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    
-    if (renderPassDescriptor != nil)
-    {
-      renderPassDescriptor.colorAttachments[0].texture = _render12C0R3;
-      renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[1].texture = _render12C1R3;
-      renderPassDescriptor.colorAttachments[1].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[1].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[2].texture = _render12C2R3;
-      renderPassDescriptor.colorAttachments[2].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[2].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[3].texture = _render12C3R3;
-      renderPassDescriptor.colorAttachments[3].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[3].storeAction = MTLStoreActionStore;
-      
-      id <MTLRenderCommandEncoder> renderEncoder =
-      [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-      renderEncoder.label = @"Render12R3";
-      
-      [renderEncoder pushDebugGroup: @"Render12R3"];
-      
-      // Set the region of the drawable to which we'll draw.
-      
-      MTLViewport mtlvp = {0.0, 0.0, blockWidth, blockHeight, -1.0, 1.0 };
-      [renderEncoder setViewport:mtlvp];
-      
-      [renderEncoder setRenderPipelineState:_render12PipelineState];
-      
-      [renderEncoder setVertexBuffer:_vertices
-                              offset:0
-                             atIndex:AAPLVertexInputIndexVertices];
-      
-      [renderEncoder setFragmentTexture:_render12C3R2
-                                atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_blockStartBitOffsets
-                                offset:0
-                               atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_bitsBuff
-                                offset:0
-                               atIndex:1];
-      
-      [renderEncoder setFragmentBuffer:_renderTargetDimensionsAndBlockDimensionsUniform
-                                offset:0
-                               atIndex:2];
-      
-      // Draw the 3 vertices of our triangle
-      [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                        vertexStart:0
-                        vertexCount:_numVertices];
-      
-      [renderEncoder popDebugGroup]; // RenderToTexture
-      
-      [renderEncoder endEncoding];
-    }
-  }
-  
-  // final render of 16 values
-  
-  {
-    MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    
-    if (renderPassDescriptor != nil)
-    {
-      renderPassDescriptor.colorAttachments[0].texture = _render16C0;
-      renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[1].texture = _render16C1;
-      renderPassDescriptor.colorAttachments[1].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[1].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[2].texture = _render16C2;
-      renderPassDescriptor.colorAttachments[2].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[2].storeAction = MTLStoreActionStore;
-      
-      renderPassDescriptor.colorAttachments[3].texture = _render16C3;
-      renderPassDescriptor.colorAttachments[3].loadAction = MTLLoadActionDontCare;
-      renderPassDescriptor.colorAttachments[3].storeAction = MTLStoreActionStore;
-      
-      id <MTLRenderCommandEncoder> renderEncoder =
-      [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-      renderEncoder.label = @"Render16R4";
-      
-      [renderEncoder pushDebugGroup: @"Render16R4"];
-      
-      // Set the region of the drawable to which we'll draw.
-      
-      MTLViewport mtlvp = {0.0, 0.0, blockWidth, blockHeight, -1.0, 1.0 };
-      [renderEncoder setViewport:mtlvp];
-      
-      [renderEncoder setRenderPipelineState:_render16PipelineState];
-      
-      [renderEncoder setVertexBuffer:_vertices
-                              offset:0
-                             atIndex:AAPLVertexInputIndexVertices];
-      
-      [renderEncoder setFragmentTexture:_render12C3R3
-                                atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_blockStartBitOffsets
-                                offset:0
-                               atIndex:0];
-      
-      [renderEncoder setFragmentBuffer:_bitsBuff
-                                offset:0
-                               atIndex:1];
-        
-      [renderEncoder setFragmentBuffer:_renderTargetDimensionsAndBlockDimensionsUniform
-                                offset:0
-                               atIndex:2];
-      
-      // Draw the 3 vertices of our triangle
-      [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                        vertexStart:0
-                        vertexCount:_numVertices];
-      
-      [renderEncoder popDebugGroup]; // RenderToTexture
-      
-      [renderEncoder endEncoding];
-    }
-  }
-  
-  // blit the results from the previous shaders into a "slices" texture that is
-  // as tall as each block buffer.
-  
-  {
-    NSArray *inRenderedSymbolsTextures = @[
-                                           _render12C0R0,
-                                           _render12C1R0,
-                                           _render12C2R0,
-                                           _render12C0R1,
-                                           _render12C1R1,
-                                           _render12C2R1,
-                                           _render12C0R2,
-                                           _render12C1R2,
-                                           _render12C2R2,
-                                           _render12C0R3,
-                                           _render12C1R3,
-                                           _render12C2R3,
-                                           _render16C0,
-                                           _render16C1,
-                                           _render16C2,
-                                           _render16C3,
-                                           ];
-    
-    id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
-    
-    MTLSize inTxtSize = MTLSizeMake(blockWidth, blockHeight, 1);
-    MTLOrigin inTxtOrigin = MTLOriginMake(0, 0, 0);
-    
-    const int maxCol = 4096 / 512; // max 8 blocks in one row
-    
-    int outCol = 0;
-    int outRow = 0;
-    
-    int slice = 0;
-    for ( id<MTLTexture> blockTxt in inRenderedSymbolsTextures ) {
-      // Blit a block of pixels to (X,Y) location that is a multiple of (blockWidth,blockHeight)
-      MTLOrigin outTxtOrigin = MTLOriginMake(outCol * blockWidth, outRow * blockHeight, 0);
-      
-      [blitEncoder copyFromTexture:blockTxt
-                       sourceSlice:0
-                       sourceLevel:0
-                      sourceOrigin:inTxtOrigin
-                        sourceSize:inTxtSize
-                         toTexture:_renderCombinedSlices
-                  destinationSlice:0
-                  destinationLevel:0
-                 destinationOrigin:outTxtOrigin];
-      
-      //NSLog(@"blit for slice %2d : write to (%5d, %5d) %4d x %4d in _renderCombinedSlices", slice, (int)outTxtOrigin.x, (int)outTxtOrigin.y, (int)inTxtSize.width, (int)inTxtSize.height);
-      
-      slice += 1;
-      outCol += 1;
-      
-      if (outCol == maxCol) {
-        outCol = 0;
-        outRow += 1;
-      }
-    }
-    assert(slice == 16);
-    
-    [blitEncoder endEncoding];
-  }
-  
-  // Cropping copy operation from _renderToTexturePipelineState which is unsigned int values
-  // to _render_texture which contains pixel values. This copy operation will expand single
-  // byte values emitted by the huffman decoder as grayscale pixels.
-
-  MTLRenderPassDescriptor *renderToTexturePassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-  
-  if (renderToTexturePassDescriptor != nil)
-  {
-    renderToTexturePassDescriptor.colorAttachments[0].texture = _render_texture;
-    renderToTexturePassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
-    renderToTexturePassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    
-    id <MTLRenderCommandEncoder> renderEncoder =
-      [commandBuffer renderCommandEncoderWithDescriptor:renderToTexturePassDescriptor];
-    renderEncoder.label = @"RenderToTextureCommandEncoder";
-
-    [renderEncoder pushDebugGroup: @"RenderToTexture"];
-    
-    // Set the region of the drawable to which we'll draw.
-    
-    MTLViewport mtlvp = {0.0, 0.0, _render_texture.width, _render_texture.height, -1.0, 1.0 };
-    [renderEncoder setViewport:mtlvp];
-    
-    [renderEncoder setRenderPipelineState:_renderToTexturePipelineState];
-    
-    [renderEncoder setVertexBuffer:_vertices
-                            offset:0
-                           atIndex:AAPLVertexInputIndexVertices];
-    
-    [renderEncoder setFragmentTexture:_renderCombinedSlices
-                              atIndex:0];
-    
-    [renderEncoder setFragmentBuffer:_renderTargetDimensionsAndBlockDimensionsUniform
-                              offset:0
-                             atIndex:0];
-    
-    // Draw the 3 vertices of our triangle
-    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                      vertexStart:0
-                      vertexCount:_numVertices];
-    
-    [renderEncoder popDebugGroup]; // RenderToTexture
-    
-    [renderEncoder endEncoding];
-  }
-    
   // --------------------------------------------------------------------------
   
   // Obtain a renderPassDescriptor generated from the view's drawable textures
@@ -1646,7 +1000,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
                       vertexCount:_numVertices];
     
     [renderEncoder popDebugGroup]; // RenderFromTexture
-    
+   
     [renderEncoder endEncoding];
     
     // Schedule a present once the framebuffer is complete using the current drawable
@@ -1662,34 +1016,15 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     
     const int assertOnValueDiff = 1;
     
-    if (isCaptureRenderedTextureEnabled && 0) {
+    if (isCaptureRenderedTextureEnabled) {
       
-      //[self dump4ByteTexture:_render12Zeros label:@"_render12Zeros"];
+      // Dump contents of prefix sum render
       
-      [self dump4ByteTexture:_render12C0R0 label:@"_render12C0R0"];
-      [self dump4ByteTexture:_render12C1R0 label:@"_render12C1R0"];
-      [self dump4ByteTexture:_render12C2R0 label:@"_render12C2R0"];
-      [self dump4ByteTexture:_render12C3R0 label:@"_render12C3R0 (bits used)"];
+      //   MetalPrefixSumRenderFrame *mpsRenderFrame = self.mpsRenderFrame;
       
-      [self dump4ByteTexture:_render12C0R1 label:@"_render12C0R1"];
-      [self dump4ByteTexture:_render12C1R1 label:@"_render12C1R1"];
-      [self dump4ByteTexture:_render12C2R1 label:@"_render12C2R1"];
-      [self dump4ByteTexture:_render12C3R1 label:@"_render12C3R1 (bits used)"];
+      id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.reduceTextures[0];
       
-      [self dump4ByteTexture:_render12C0R2 label:@"_render12C0R2"];
-      [self dump4ByteTexture:_render12C1R2 label:@"_render12C1R2"];
-      [self dump4ByteTexture:_render12C2R2 label:@"_render12C2R2"];
-      [self dump4ByteTexture:_render12C3R2 label:@"_render12C3R2 (bits used)"];
-      
-      [self dump4ByteTexture:_render12C0R2 label:@"_render12C0R3"];
-      [self dump4ByteTexture:_render12C1R2 label:@"_render12C1R3"];
-      [self dump4ByteTexture:_render12C2R2 label:@"_render12C2R3"];
-      [self dump4ByteTexture:_render12C3R2 label:@"_render12C3R3 (bits used)"];
-      
-      [self dump4ByteTexture:_render16C0 label:@"_render16C0"];
-      [self dump4ByteTexture:_render16C1 label:@"_render16C1"];
-      [self dump4ByteTexture:_render16C2 label:@"_render16C2"];
-      [self dump4ByteTexture:_render16C3 label:@"_render16C3"];
+      [self dump8BitTexture:outputTexture label:@"outputTextureD1"];
     }
     
     // Output of block padded shader write operation
@@ -1699,7 +1034,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     }
     
     // Capture the render to texture state at the render to size
-    if (isCaptureRenderedTextureEnabled) {
+    if (isCaptureRenderedTextureEnabled && 0) {
       // Query output texture
       
       id<MTLTexture> outTexture = _render_texture;
@@ -1848,7 +1183,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       }
     }
     
-    // end of render
+    // end of view render
   }
   
   // Finalize rendering here & push the command buffer to the GPU

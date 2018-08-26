@@ -1,5 +1,5 @@
 //
-//  MetalRenderFrame.m
+//  MetalPrefixSumRenderFrame.m
 //
 //  Copyright 2016 Mo DeJong.
 //
@@ -8,7 +8,7 @@
 //  This object contains references to Metal buffers that implement decoding
 //  and rendering of data from a file.
 
-#include "MetalRenderFrame.h"
+#include "MetalPrefixSumRenderFrame.h"
 
 #include "MetalRenderContext.h"
 
@@ -18,28 +18,19 @@
 
 // Private API
 
-@interface MetalRenderFrame ()
+@interface MetalPrefixSumRenderFrame ()
 
 @end
 
 // Main class performing the rendering
-@implementation MetalRenderFrame
+@implementation MetalPrefixSumRenderFrame
 
 - (NSString*) description
 {
-#if defined(DEBUG)
-  return [NSString stringWithFormat:@"renderFrame %p, isReadLocked %d : W x H %d x %d",
-          self,
-          (int)self.isReadLocked,
-          (int)self.width,
-          (int)self.height];
-#else
-  return [NSString stringWithFormat:@"renderFrame %p, W x H %d x %d",
+  return [NSString stringWithFormat:@"mpsRenderFrame %p : W x H %d x %d",
           self,
           (int)self.width,
           (int)self.height];
-#endif // DEBUG
-  
 }
 
 @end

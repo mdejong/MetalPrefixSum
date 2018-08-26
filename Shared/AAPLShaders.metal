@@ -14,6 +14,8 @@ using namespace metal;
 
 #import "AAPLShaderTypes.h"
 
+#import "MetalUtils.metal"
+
 // Vertex shader outputs and per-fragmeht inputs.  Includes clip-space position and vertex outputs
 //  interpolated by rasterizer and fed to each fragment genterated by clip-space primitives.
 typedef struct
@@ -202,65 +204,6 @@ eliasgDecodeSymbol(
   vws.bitWidth = ((countOfZeros << 1) + 1); // ((countOfZeros * 2) + 1);
   
   return vws;
-}
-
-// Given coordinates, calculate relative coordinates in a 2d grid
-// by applying a block offset. A blockOffset for a 2x2 block
-// would be:
-//
-// [0 1]
-// [2 3]
-
-ushort2 relative_coords(const ushort2 rootCoords, const ushort blockDim, ushort blockOffset)
-{
-  const ushort dx = blockOffset % blockDim;
-  const ushort dy = blockOffset / blockDim;
-  return rootCoords + ushort2(dx, dy);
-}
-
-// Given a half precision float value that represents a normalized byte, convert
-// from floating point to a byte representation and return as a ushort value.
-
-ushort ushort_from_half(const half inHalf)
-{
-  return ushort(round(inHalf * 255.0h));
-}
-
-uint uint_from_half(const half inHalf)
-{
-  return uint(ushort_from_half(inHalf));
-}
-
-// Given 4 half values that represent normalized float byte values,
-// convert each component to a BGRA uint representation
-
-uint uint_from_half4(const half4 inHalf4)
-{
-  ushort b = ushort_from_half(inHalf4.b);
-  ushort g = ushort_from_half(inHalf4.g);
-  ushort r = ushort_from_half(inHalf4.r);
-  ushort a = ushort_from_half(inHalf4.a);
-  
-  ushort c0 = (g << 8) | b;
-  ushort c1 = (a << 8) | r;
-  
-  return (uint(c1) << 16) | uint(c0);
-}
-
-// FIXME: faster to calc based on constant half pixel already as float?
-
-// Given a fragment shader coordinate (normalized) calculate an integer "gid" value
-// that represents the (X,Y) as a short coordinate pair.
-
-ushort2 calc_gid_from_frag_norm_coord(const ushort2 dims, const float2 textureCoordinate)
-{
-  // Convert float coordinates to integer (X,Y) offsets, aka gid
-  const float2 textureSize = float2(dims.x, dims.y);
-  float2 c = textureCoordinate;
-  const float2 halfPixel = (1.0 / textureSize) / 2.0;
-  c -= halfPixel;
-  ushort2 gid = ushort2(round(c * textureSize));
-  return gid;
 }
 
 //int32_t
