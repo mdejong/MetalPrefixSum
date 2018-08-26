@@ -945,13 +945,13 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       }
       
       {
-        // Render to texture pipeline
+        // Render to texture pipeline, simple pass through shader
         
         // Load the vertex function from the library
-        id <MTLFunction> vertexFunction = [defaultLibrary newFunctionWithName:@"vertexShader"];
+        id <MTLFunction> vertexFunction = [defaultLibrary newFunctionWithName:@"samplingPassThroughVertexShader"];
 
         // Load the fragment function from the library
-        id <MTLFunction> fragmentFunction = [defaultLibrary newFunctionWithName:@"samplingPassThroughShader"];
+        id <MTLFunction> fragmentFunction = [defaultLibrary newFunctionWithName:@"samplingPassThroughFragmentShader"];
       
       {
         // Set up a descriptor for creating a pipeline state object

@@ -85,17 +85,6 @@ fragmentFillShader2(RasterizerData in [[stage_in]])
   return float4(0.0, 1.0 - in.textureCoordinate.y, in.textureCoordinate.y, 1.0);
 }
 
-// Fragment function
-fragment float4
-samplingPassThroughShader(RasterizerData in [[stage_in]],
-               texture2d<half, access::sample> inTexture [[ texture(AAPLTextureIndexes) ]])
-{
-  constexpr sampler s(mag_filter::linear, min_filter::linear);
-  
-  return float4(inTexture.sample(s, in.textureCoordinate));
-  
-}
-
 // Fragment function that crops from the input texture while rendering
 // pixels to the output texture.
 
