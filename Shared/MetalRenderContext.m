@@ -81,6 +81,22 @@
   return texture;
 }
 
+- (void) fillBGRATexture:(id<MTLTexture>)texture pixels:(uint32_t*)pixels
+{
+  NSUInteger bytesPerRow = texture.width * sizeof(uint32_t);
+  
+  MTLRegion region = {
+    { 0, 0, 0 },                   // MTLOrigin
+    {texture.width, texture.height, 1} // MTLSize
+  };
+  
+  // Copy the bytes from our data object into the texture
+  [texture replaceRegion:region
+             mipmapLevel:0
+               withBytes:pixels
+             bytesPerRow:bytesPerRow];
+}
+
 // Allocate texture that contains an 8 bit int value in the range (0, 255)
 // represented by a half float value.
 
@@ -120,6 +136,25 @@
   return texture;
 }
 
+// Fill values in an 8 bit texture
+
+- (void) fill8bitTexture:(id<MTLTexture>)texture
+                   bytes:(uint8_t*)bytes
+{
+    NSUInteger bytesPerRow = texture.width * sizeof(uint8_t);
+    
+    MTLRegion region = {
+      { 0, 0, 0 },                   // MTLOrigin
+      {texture.width, texture.height, 1} // MTLSize
+    };
+    
+    // Copy the bytes from our data object into the texture
+    [texture replaceRegion:region
+               mipmapLevel:0
+                 withBytes:bytes
+               bytesPerRow:bytesPerRow];
+}
+
 // Allocate 16 bit unsigned int texture
 
 - (id<MTLTexture>) make16bitTexture:(CGSize)size halfwords:(uint16_t*)halfwords usage:(MTLTextureUsage)usage
@@ -155,6 +190,23 @@
   }
   
   return texture;
+}
+
+- (void) fill16bitTexture:(id<MTLTexture>)texture halfwords:(uint16_t*)halfwords
+{
+
+  NSUInteger bytesPerRow = texture.width * sizeof(uint16_t);
+  
+  MTLRegion region = {
+    { 0, 0, 0 },                   // MTLOrigin
+    {texture.width, texture.height, 1} // MTLSize
+  };
+  
+  // Copy the bytes from our data object into the texture
+  [texture replaceRegion:region
+             mipmapLevel:0
+               withBytes:halfwords
+             bytesPerRow:bytesPerRow];
 }
 
 // Create identity vertex buffer

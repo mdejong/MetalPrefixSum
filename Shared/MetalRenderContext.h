@@ -39,13 +39,21 @@
 
 - (id<MTLTexture>) makeBGRATexture:(CGSize)size pixels:(uint32_t*)pixels usage:(MTLTextureUsage)usage;
 
+- (void) fillBGRATexture:(id<MTLTexture>)texture pixels:(uint32_t*)pixels;
+
 // Allocate texture that contains an 8 bit int value in the range (0, 255)
 // represented by a half float value.
 
 - (id<MTLTexture>) make8bitTexture:(CGSize)size bytes:(uint8_t*)bytes usage:(MTLTextureUsage)usage;
 
+// Fill values in an 8 bit texture
+
+- (void) fill8bitTexture:(id<MTLTexture>)texture bytes:(uint8_t*)bytes;
+
 // Allocate 16 bit unsigned int texture
 
 - (id<MTLTexture>) make16bitTexture:(CGSize)size halfwords:(uint16_t*)halfwords usage:(MTLTextureUsage)usage;
+
+- (void) fill16bitTexture:(id<MTLTexture>)texture halfwords:(uint16_t*)halfwords;
 
 @end

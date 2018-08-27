@@ -112,6 +112,7 @@
   // Texture that holds block order input bytes
   
   {
+    /*
     assert(width == 4);
     assert(height == 4);
     
@@ -121,8 +122,9 @@
       8,   9, 10, 11,
       12, 13, 14, 15
     };
+    */
     
-    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:prefixSumBytes usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
+    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
     renderFrame.inputBlockOrderTexture = txt;
   }
