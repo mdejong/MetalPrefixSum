@@ -168,6 +168,9 @@
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
   
+  XCTAssert(outputTexture.width == 2);
+  XCTAssert(outputTexture.height == 4);
+  
   // fill inputTexture
 
   [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
@@ -240,6 +243,9 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  
+  XCTAssert(outputTexture.width == 2);
+  XCTAssert(outputTexture.height == 2);
   
   // fill inputTexture
   

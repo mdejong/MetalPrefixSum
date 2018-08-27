@@ -134,10 +134,21 @@
   renderFrame.reduceTextures = [NSMutableArray array];
   renderFrame.sweepTextures = [NSMutableArray array];
   
+  int textureWidth = width;
+  int textureHeight = height;
+  
   // Create a single output texture at 1/2 the height
   
   for (int i = 0; i < 1; i++) {
-    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width/2, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
+    if (textureWidth == textureHeight) {
+      // square texture to rect of 1/2 the width
+      textureWidth = textureWidth / 2;
+    } else {
+      // rect texture to square that is 1/2 the height
+      textureHeight = textureHeight / 2;
+    }
+    
+    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
 
     [renderFrame.reduceTextures addObject:txt];
   }
