@@ -69,6 +69,8 @@
 		3C06046D2133B2B60035E5EC /* PrefixSum.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3C05293521333DA000A41138 /* PrefixSum.metal */; };
 		3C0604702133B2CA0035E5EC /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C06046F2133B2CA0035E5EC /* MetalKit.framework */; };
 		3C0604712133B2D30035E5EC /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C06046F2133B2CA0035E5EC /* MetalKit.framework */; };
+		3C0604732134A79B0035E5EC /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CDE87A11FC0FAAC00EDB3FC /* Util.m */; };
+		3C0604742134A79B0035E5EC /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CDE87A11FC0FAAC00EDB3FC /* Util.m */; };
 		3C1C56B31FE4433F0024A55E /* ImageIpadSize.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */; };
 		3C4DC8FB1FDB495F00AABD25 /* ImageHuge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */; };
 		3C56AF9B1FEC70F000005C41 /* BigBridge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C56AF9A1FEC70F000005C41 /* BigBridge.png */; };
@@ -150,6 +152,7 @@
 		3C05295C213376E000A41138 /* EmptyAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EmptyAppTests.m; sourceTree = "<group>"; };
 		3C05295E213376E000A41138 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C06046F2133B2CA0035E5EC /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/MetalKit.framework; sourceTree = DEVELOPER_DIR; };
+		3C0604722134A0F50035E5EC /* prefix_sum.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = prefix_sum.h; sourceTree = "<group>"; };
 		3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageIpadSize.png; sourceTree = "<group>"; };
 		3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageHuge.png; sourceTree = "<group>"; };
 		3C56AF9A1FEC70F000005C41 /* BigBridge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BigBridge.png; sourceTree = "<group>"; };
@@ -274,6 +277,7 @@
 				3C0529292133318900A41138 /* MetalPrefixSumRenderFrame.m */,
 				3AF7E9BE1EB64A46003BB06D /* AAPLRenderer.h */,
 				3AF7E9BF1EB64A46003BB06D /* AAPLRenderer.m */,
+				3C0604722134A0F50035E5EC /* prefix_sum.h */,
 				3C56AF9F1FECE8F900005C41 /* VariableBitWidthSymbol.h */,
 				3CDE879D1FBDFE1300EDB3FC /* Eliasg.h */,
 				3CDE879E1FBDFE1300EDB3FC /* Eliasg.mm */,
@@ -693,6 +697,7 @@
 				3C05296721337C6800A41138 /* MetalRenderContext.m in Sources */,
 				3C052945213376D200A41138 /* AppDelegate.m in Sources */,
 				3C0604662133B0B20035E5EC /* PassThroughShader.metal in Sources */,
+				3C0604732134A79B0035E5EC /* Util.m in Sources */,
 				3C05296521337C5E00A41138 /* MetalPrefixSumRenderContext.m in Sources */,
 				3C06046C2133B2B50035E5EC /* PrefixSum.metal in Sources */,
 			);
@@ -707,6 +712,7 @@
 				3C05295D213376E000A41138 /* EmptyAppTests.m in Sources */,
 				3C0604672133B0B30035E5EC /* PassThroughShader.metal in Sources */,
 				3C06046D2133B2B60035E5EC /* PrefixSum.metal in Sources */,
+				3C0604742134A79B0035E5EC /* Util.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

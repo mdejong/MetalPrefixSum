@@ -12,6 +12,10 @@
 #import "MetalPrefixSumRenderContext.h"
 #import "MetalPrefixSumRenderFrame.h"
 
+#import "prefix_sum.h"
+
+#import "Util.h"
+
 @interface EmptyAppTests : XCTestCase
 
 @end
@@ -387,9 +391,17 @@
     }
   }
   
-  // Reduced output is the sum of pairs of input at 16x32
+  // Reduce 32x32 down to 16x32
   
-  NSMutableArray *epectedRenderedArr = [NSMutableArray array];
+  NSMutableData *epectedInputData = [Util bytesArrayToData:epectedInputArr];
+  NSMutableData *epectedRenderedData = [NSMutableData dataWithLength:epectedInputData.length/2];
+  
+  PrefisSum_reduce((uint8_t*)epectedInputData.bytes, (int)epectedInputData.length,
+                   (uint8_t*)epectedRenderedData.bytes, (int)epectedRenderedData.length);
+  
+  // Convert prefix sum reduction back to NSArray
+  
+  NSArray *epectedRenderedArr = [Util byteDataToArray:epectedRenderedData];
   
   {
     int width = 16;
@@ -403,17 +415,13 @@
           offset = 58;
         }
         
-        int offset2x = offset * 2;
+        uint8_t *ptr = epectedRenderedData.bytes;
+        int sumByte = ptr[offset];
         
-        NSNumber *inNum1 = epectedInputArr[offset2x];
-        NSNumber *inNum2 = epectedInputArr[offset2x+1];
+        if (offset == 58) {
+          offset = 58;
+        }
         
-        uint8_t in1 = [inNum1 unsignedCharValue];
-        uint8_t in2 = [inNum2 unsignedCharValue];
-        
-        uint8_t sumByte = in1 + in2;
-        
-        [epectedRenderedArr addObject:@(sumByte)];
       }
     }
   }
