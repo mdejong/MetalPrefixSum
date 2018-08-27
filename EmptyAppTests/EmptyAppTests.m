@@ -290,13 +290,13 @@
 
 - (void)testMetalReduce2x2To1x2 {
   NSArray *epectedInputArr = @[
-                               @0, @1,
-                               @2, @3,
+                               @(1+5),   @(9+13),
+                               @(17+21), @(25+29)
                                ];
   
   NSArray *epectedRenderedArr = @[
-                                  @(0+1),
-                                  @(2+3)
+                                  @(1+5+9+13),
+                                  @(17+21+25+29)
                                   ];
 
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
