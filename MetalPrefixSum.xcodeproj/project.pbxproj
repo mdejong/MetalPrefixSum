@@ -59,6 +59,16 @@
 		3C05296521337C5E00A41138 /* MetalPrefixSumRenderContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529302133379C00A41138 /* MetalPrefixSumRenderContext.m */; };
 		3C05296621337C6400A41138 /* MetalPrefixSumRenderFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529292133318900A41138 /* MetalPrefixSumRenderFrame.m */; };
 		3C05296721337C6800A41138 /* MetalRenderContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529262133318700A41138 /* MetalRenderContext.m */; };
+		3C0604662133B0B20035E5EC /* PassThroughShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529222133307200A41138 /* PassThroughShader.metal */; };
+		3C0604672133B0B30035E5EC /* PassThroughShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529222133307200A41138 /* PassThroughShader.metal */; };
+		3C0604682133B14D0035E5EC /* AAPLShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3AF7E9C11EB64A46003BB06D /* AAPLShaders.metal */; };
+		3C0604692133B14E0035E5EC /* AAPLShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3AF7E9C11EB64A46003BB06D /* AAPLShaders.metal */; };
+		3C06046A2133B2AE0035E5EC /* MetalUtils.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529392133442500A41138 /* MetalUtils.metal */; };
+		3C06046B2133B2AE0035E5EC /* MetalUtils.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529392133442500A41138 /* MetalUtils.metal */; };
+		3C06046C2133B2B50035E5EC /* PrefixSum.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3C05293521333DA000A41138 /* PrefixSum.metal */; };
+		3C06046D2133B2B60035E5EC /* PrefixSum.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3C05293521333DA000A41138 /* PrefixSum.metal */; };
+		3C0604702133B2CA0035E5EC /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C06046F2133B2CA0035E5EC /* MetalKit.framework */; };
+		3C0604712133B2D30035E5EC /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C06046F2133B2CA0035E5EC /* MetalKit.framework */; };
 		3C1C56B31FE4433F0024A55E /* ImageIpadSize.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */; };
 		3C4DC8FB1FDB495F00AABD25 /* ImageHuge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */; };
 		3C56AF9B1FEC70F000005C41 /* BigBridge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C56AF9A1FEC70F000005C41 /* BigBridge.png */; };
@@ -139,6 +149,7 @@
 		3C052958213376DF00A41138 /* EmptyAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmptyAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C05295C213376E000A41138 /* EmptyAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EmptyAppTests.m; sourceTree = "<group>"; };
 		3C05295E213376E000A41138 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3C06046F2133B2CA0035E5EC /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/MetalKit.framework; sourceTree = DEVELOPER_DIR; };
 		3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageIpadSize.png; sourceTree = "<group>"; };
 		3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageHuge.png; sourceTree = "<group>"; };
 		3C56AF9A1FEC70F000005C41 /* BigBridge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BigBridge.png; sourceTree = "<group>"; };
@@ -186,6 +197,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C0604702133B2CA0035E5EC /* MetalKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,6 +205,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C0604712133B2D30035E5EC /* MetalKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +252,7 @@
 				3AF7E9C91EB64A46003BB06D /* Products */,
 				BAF19B51F5CC6B560567D1A3 /* Configuration */,
 				BC4A753D78DE6B5DFEAA247C /* LICENSE */,
+				3C06046E2133B2C90035E5EC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -382,6 +396,14 @@
 				3C05295E213376E000A41138 /* Info.plist */,
 			);
 			path = EmptyAppTests;
+			sourceTree = "<group>";
+		};
+		3C06046E2133B2C90035E5EC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3C06046F2133B2CA0035E5EC /* MetalKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		BAF19B51F5CC6B560567D1A3 /* Configuration */ = {
@@ -665,10 +687,14 @@
 			files = (
 				3C052948213376D200A41138 /* ViewController.m in Sources */,
 				3C052953213376DE00A41138 /* main.m in Sources */,
+				3C0604682133B14D0035E5EC /* AAPLShaders.metal in Sources */,
+				3C06046A2133B2AE0035E5EC /* MetalUtils.metal in Sources */,
 				3C05296621337C6400A41138 /* MetalPrefixSumRenderFrame.m in Sources */,
 				3C05296721337C6800A41138 /* MetalRenderContext.m in Sources */,
 				3C052945213376D200A41138 /* AppDelegate.m in Sources */,
+				3C0604662133B0B20035E5EC /* PassThroughShader.metal in Sources */,
 				3C05296521337C5E00A41138 /* MetalPrefixSumRenderContext.m in Sources */,
+				3C06046C2133B2B50035E5EC /* PrefixSum.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -676,7 +702,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C0604692133B14E0035E5EC /* AAPLShaders.metal in Sources */,
+				3C06046B2133B2AE0035E5EC /* MetalUtils.metal in Sources */,
 				3C05295D213376E000A41138 /* EmptyAppTests.m in Sources */,
+				3C0604672133B0B30035E5EC /* PassThroughShader.metal in Sources */,
+				3C06046D2133B2B60035E5EC /* PrefixSum.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -969,7 +999,7 @@
 				DEVELOPMENT_TEAM = 9F74CLHA49;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = EmptyApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.helpurock.EmptyApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -993,7 +1023,7 @@
 				DEVELOPMENT_TEAM = 9F74CLHA49;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = EmptyApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.helpurock.EmptyApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
