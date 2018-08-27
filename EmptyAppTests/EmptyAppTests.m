@@ -415,7 +415,7 @@
           offset = 58;
         }
         
-        uint8_t *ptr = epectedRenderedData.bytes;
+        uint8_t *ptr = (uint8_t *) epectedRenderedData.bytes;
         int sumByte = ptr[offset];
         
         if (offset == 58) {

@@ -132,6 +132,11 @@ fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
   // height of render texture
   //return uint8_to_half(renderSize.y);
   
+  // return just the first value read
+  //return uint8_to_half(b1);
+  // return just the second value read
+  //return uint8_to_half(b2);
+  
   return uint8_to_half(b1 + b2);
 }
 
