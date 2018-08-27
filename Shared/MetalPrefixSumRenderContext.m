@@ -37,7 +37,7 @@
                                                    pipelineLabel:@"PrefixSumReduce Square Pipeline"
                                                   numAttachments:1
                                               vertexFunctionName:@"vertexShader"
-                                            fragmentFunctionName:@"fragmentShaderPrefixSumReduceSquare"];
+                                            fragmentFunctionName:@"fragmentShaderPrefixSumReduce"];
   
   NSAssert(self.reduceSquarePipelineState, @"reduceSquarePipelineState");
   
@@ -289,9 +289,18 @@
     id<MTLTexture> outputTexture = (id<MTLTexture>) renderFrame.reduceTextures[0];
     
 #if defined(DEBUG)
-    // Output should be 1/2 the width of input
-    assert((inputTexture.width / 2) == outputTexture.width);
-    assert(inputTexture.height == outputTexture.height);
+    // Output of a square reduce is 1/2 the width
+    // Output of a rect reduce is 1/2 the height
+    
+    if (inputTexture.width == inputTexture.height) {
+      // reduce square
+      assert((inputTexture.width / 2) == outputTexture.width);
+      assert(inputTexture.height == outputTexture.height);
+    } else {
+      // reduce rect
+      assert(inputTexture.width == outputTexture.width);
+      assert((inputTexture.height / 2) == outputTexture.height);
+    }
 #endif // DEBUG
     
     renderPassDescriptor.colorAttachments[0].texture = outputTexture;

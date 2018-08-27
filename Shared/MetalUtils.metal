@@ -31,6 +31,25 @@ ushort2 relative_coords(const ushort2 rootCoords, const ushort blockDim, ushort 
   return rootCoords + ushort2(dx, dy);
 }
 
+// Convert image (X,Y) to a uint offset
+
+static inline
+uint coords_to_offset(const ushort width, const ushort2 coords)
+{
+  uint offset = (uint(coords.y) * width) + coords.x;
+  return offset;
+}
+
+// Convert image offset stored in a uint to (X,Y)
+
+static inline
+ushort2 offset_to_coords(const ushort blockDim, const uint offset)
+{
+  const ushort dx = offset % blockDim;
+  const ushort dy = offset / blockDim;
+  return ushort2(dx, dy);
+}
+
 // Given a half precision float value that represents a normalized byte, convert
 // from floating point to a byte representation and return as a ushort value.
 

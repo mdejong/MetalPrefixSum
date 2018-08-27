@@ -89,18 +89,43 @@ typedef struct
 // FIXME: remove rtd arguent if blockSize is not needed for calc_gid_from_frag_norm_coord()
 
 fragment half
-fragmentShaderPrefixSumReduceSquare(RasterizerData in [[stage_in]],
+fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
                                     texture2d<half, access::read> inTexture [[ texture(0) ]],
                                     constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
 {
-  const ushort2 renderSize = ushort2(inTexture.get_width() / 2, inTexture.get_height());
-  ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
-  gid.x *= 2;
-  ushort2 gid2 = gid;
-  gid2.x += 1;
+//  const ushort2 renderSize = ushort2(inTexture.get_width() / 2, inTexture.get_height());
+//  ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
+//  gid.x *= 2;
+//  ushort2 gid2 = gid;
+//  gid2.x += 1;
+
+  // 0123 4567 89AB
+
+  ushort2 renderSize;
   
-  uint8_t b1 = uint8_from_half(inTexture.read(gid).x);
-  uint8_t b2 = uint8_from_half(inTexture.read(gid2).x);
+  // FIXME: pass output render size in rtd ?
+  
+  if (inTexture.get_width() == inTexture.get_height()) {
+    // Reduce Square
+    renderSize = ushort2(inTexture.get_width() / 2, inTexture.get_height());
+  } else {
+    // Reduce Rect
+    renderSize = ushort2(inTexture.get_width(), inTexture.get_height() / 2);
+  }
+  
+  ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
+  
+  uint gidOffset1 = coords_to_offset(renderSize.x, gid);
+  gidOffset1 *= 2;
+
+  uint gidOffset2 = gidOffset1 + 1;
+  
+  // Convert to (X,Y) coords in terms of input width
+  ushort2 b1Coords = offset_to_coords(inTexture.get_width(), gidOffset1);
+  ushort2 b2Coords = offset_to_coords(inTexture.get_width(), gidOffset2);
+  
+  uint8_t b1 = uint8_from_half(inTexture.read(b1Coords).x);
+  uint8_t b2 = uint8_from_half(inTexture.read(b2Coords).x);
   
   // width of render texture
   //return uint8_to_half(renderSize.x);
@@ -110,6 +135,8 @@ fragmentShaderPrefixSumReduceSquare(RasterizerData in [[stage_in]],
   return uint8_to_half(b1 + b2);
 }
 
+/*
+ 
 // fragment shader that reads a N/2 x N block and writes a N/2 x N/2
 // pixels to the output texture.
 
@@ -162,4 +189,6 @@ fragmentShaderPrefixSumReduceRect(RasterizerData in [[stage_in]],
   
   return uint8_to_half(b1 + b2);
 }
+
+ */
 
