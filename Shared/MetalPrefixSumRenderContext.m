@@ -112,16 +112,6 @@
   }
   
   NSLog(@"for %d x %d block dimension : numReductions %d", blockDimension, blockDimension, numReductions);
-  
-  // FIXME: should be provided by caller
-  
-  // Texture that holds original image order input bytes
-  
-  {
-    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
-    
-    renderFrame.inputImageOrderTexture = txt;
-  }
 
   // Texture that holds block order input bytes
   
@@ -129,6 +119,14 @@
     id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
     renderFrame.inputBlockOrderTexture = txt;
+  }
+
+  // Texture that holds block order input bytes
+  
+  {
+    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
+    
+    renderFrame.outputBlockOrderTexture = txt;
   }
   
   // FIXME: pass int recursion depth into reduction and sweep shader (stack on N of these)

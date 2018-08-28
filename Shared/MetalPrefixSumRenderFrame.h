@@ -26,16 +26,14 @@
 
 @property (nonatomic, assign) int blockDim;
 
-//@property (nonatomic, assign) int blockWidth;
-//@property (nonatomic, assign) int blockHeight;
-
 // The original input image order in image order
 
-@property (nonatomic, retain) id<MTLTexture> inputImageOrderTexture;
+//@property (nonatomic, retain) id<MTLTexture> inputImageOrderTexture;
 
 // The original input image order in block order
 
 @property (nonatomic, retain) id<MTLTexture> inputBlockOrderTexture;
+@property (nonatomic, retain) id<MTLTexture> outputBlockOrderTexture;
 
 // As inputBlockOrderTexture is reduced, a series of output
 // textures is needed to buffer data. Note that the final

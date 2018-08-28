@@ -1221,7 +1221,7 @@
   
   id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
   id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
-  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.inputImageOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
   
   XCTAssert(outputTexture.width == 2);
   XCTAssert(outputTexture.height == 2);
