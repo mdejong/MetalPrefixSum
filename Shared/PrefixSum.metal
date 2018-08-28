@@ -137,7 +137,30 @@ fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
   // return just the second value read
   //return uint8_to_half(b2);
   
-  return uint8_to_half(b1 + b2);
+  //return uint8_to_half(b1 + b2);
+  
+  /*
+  // Note that dividing by 255.0h results in a bug on A7
+  // while a float divide does not generate the optimization.
+  
+  ushort b1 = ushort_from_half(inTexture.read(b1Coords).x);
+  ushort b2 = ushort_from_half(inTexture.read(b2Coords).x);
+  
+  ushort shortSum = b1 + b2;
+  shortSum &= 0xFF;
+  return half(shortSum / 255.0);
+  */
+  
+  // This should work properly on A7 but it does not
+  
+  /*
+  uint8_t sum = b1 + b2;
+  return half(ushort(sum) / 255.0h);
+  */
+  
+  // This does work properly on A7
+  uint8_t sum = b1 + b2;
+  return half(ushort(sum) / 255.0);
 }
 
 /*
