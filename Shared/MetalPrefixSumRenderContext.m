@@ -65,49 +65,41 @@
 }
 
 // Render textures initialization
+// renderSize : indicates the size of the entire texture containing block by block numbers
+// renderFrame : holds textures used while rendering
+// blockDimension : indicates the POT dimension, a 4x4 size block is indicated by the value 4
 
 - (void) setupRenderTextures:(MetalRenderContext*)mrc
                   renderSize:(CGSize)renderSize
                  renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+               blockDimension:(int)blockDimension
 {
   unsigned int width = renderSize.width;
   unsigned int height = renderSize.height;
 
   const int blockDim = HUFF_BLOCK_DIM;
   
-//  unsigned int width = renderFrame.width;
-//  unsigned int height = renderFrame.height;
-  
-  /*
-  const int blockDim = HUFF_BLOCK_DIM;
-  
-  unsigned int width = renderSize.width;
-  unsigned int height = renderSize.height;
-  
-  assert(width > 0);
-  assert(height > 0);
-  
-  unsigned int blockWidth = width / blockDim;
-  if ((width % blockDim) != 0) {
-    blockWidth += 1;
-  }
-  
-  unsigned int blockHeight = height / blockDim;
-  if ((height % blockDim) != 0) {
-    blockHeight += 1;
-  }
-  
-  assert(blockWidth > 0);
-  assert(blockHeight > 0);
-  
-  renderFrame.blockWidth = blockWidth;
-  renderFrame.blockHeight = blockHeight;
-   
-  */
-  
   renderFrame.width = width;
   renderFrame.height = height;
   renderFrame.blockDim = blockDim;
+  
+  // The number of iterations needed to reduce a blockDimension x blockDimension
+  // sized block down to just 1 value (not including the final render to 1 pixel).
+  
+  int totalNumPixels = (int) (blockDimension * blockDimension);
+  
+  int numReductions = 0;
+  
+  for (int i = 0; i < 32; i++) {
+    totalNumPixels /= 2;
+    if (totalNumPixels == 1) {
+      // No reduction down to just 1 pixel is needed
+      break;
+    }
+    numReductions += 1;
+  }
+  
+  NSLog(@"for %d x %d block dimension : numReductions %d", blockDimension, blockDimension, numReductions);
   
   // FIXME: should be provided by caller
   
@@ -122,18 +114,6 @@
   // Texture that holds block order input bytes
   
   {
-    /*
-    assert(width == 4);
-    assert(height == 4);
-    
-    uint8_t prefixSumBytes[] = {
-      0,   1,  2,  3,
-      4,   5,  6,  7,
-      8,   9, 10, 11,
-      12, 13, 14, 15
-    };
-    */
-    
     id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
     renderFrame.inputBlockOrderTexture = txt;
@@ -149,7 +129,9 @@
   
   // Create a single output texture at 1/2 the height
   
-  for (int i = 0; i < 1; i++) {
+  int pot = 1;
+  
+  for (int i = 0; i < numReductions; i++) {
     if (textureWidth == textureHeight) {
       // square texture to rect of 1/2 the width
       textureWidth = textureWidth / 2;
@@ -158,9 +140,43 @@
       textureHeight = textureHeight / 2;
     }
     
-    id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
+    int reduceStep = i + 1;
+    
+    NSLog(@"reduction %d : texture %3d x %3d : POT %d", reduceStep, textureWidth, textureHeight, pot);
+    
+    id<MTLTexture> txt;
+    
+    txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
 
     [renderFrame.reduceTextures addObject:txt];
+    
+    NSLog(@"sweep     %d : texture %3d x %3d : POT %d", reduceStep, textureWidth, textureHeight, pot);
+    
+    txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
+    
+    [renderFrame.sweepTextures addObject:txt];
+    
+    // FIXME: allocate target dimension buffer to pass in POT ?
+    
+    pot *= 2;
+  }
+  
+  // One last texture is uninitialized so it is all zeros
+  
+  {
+    id<MTLTexture> txt;
+    
+    if (textureWidth == textureHeight) {
+      // square texture to rect of 1/2 the width
+      textureWidth = textureWidth / 2;
+    } else {
+      // rect texture to square that is 1/2 the height
+      textureHeight = textureHeight / 2;
+    }
+    
+    txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageShaderRead];
+    
+    NSLog(@"zeros : texture %d x %d", textureWidth, textureHeight);
   }
   
   // Dimensions passed into shaders
@@ -174,45 +190,6 @@
     ptr->blockWidth = width;
     ptr->blockHeight = height;
   }
-  
-  // For each block, there is one 32 bit number that stores the next bit
-  // offset into the huffman code buffer. Each successful code write operation
-  // will read from 1 to 16 bits and increment the counter for a specific block.
-  
-//  renderFrame.blockStartBitOffsets = [_device newBufferWithLength:sizeof(uint32_t)*(blockWidth*blockHeight)
-//                                                          options:MTLResourceStorageModeShared];
-  
-  /*
-  
-  // Zero out pixels / set to known init state
-  
-  if ((1))
-  {
-    int numBytes = (int) (renderFrame.render12Zeros.width * renderFrame.render12Zeros.height * sizeof(uint32_t));
-    uint32_t *pixels = malloc(numBytes);
-    
-    // Init all lanes to zero
-    memset(pixels, 0, numBytes);
-    
-    {
-      NSUInteger bytesPerRow = renderFrame.render12Zeros.width * sizeof(uint32_t);
-      
-      MTLRegion region = {
-        { 0, 0, 0 },                   // MTLOrigin
-        {renderFrame.render12Zeros.width, renderFrame.render12Zeros.height, 1} // MTLSize
-      };
-      
-      // Copy the bytes from our data object into the texture
-      [renderFrame.render12Zeros replaceRegion:region
-                        mipmapLevel:0
-                          withBytes:pixels
-                        bytesPerRow:bytesPerRow];
-    }
-    
-    free(pixels);
-  }
-   
-  */
   
   return;
 }

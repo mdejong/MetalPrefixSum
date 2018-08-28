@@ -167,7 +167,7 @@
   
   CGSize renderSize = CGSizeMake(4, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:4];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -243,7 +243,7 @@
   
   CGSize renderSize = CGSizeMake(2, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:4];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -317,7 +317,7 @@
   
   CGSize renderSize = CGSizeMake(2, 2);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:2];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -440,7 +440,7 @@
   
   CGSize renderSize = CGSizeMake(32, 32);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:32];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -577,7 +577,7 @@
   
   CGSize renderSize = CGSizeMake(16, 32);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:32];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -691,7 +691,7 @@
   
   CGSize renderSize = CGSizeMake(16, 16);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:16];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -804,7 +804,7 @@
   
   CGSize renderSize = CGSizeMake(8, 16);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:16];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -917,7 +917,7 @@
   
   CGSize renderSize = CGSizeMake(8, 8);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:8];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -1030,7 +1030,7 @@
   
   CGSize renderSize = CGSizeMake(4, 8);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf blockDimension:8];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
