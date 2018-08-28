@@ -109,12 +109,11 @@ fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
   
   uint gidOffset1 = coords_to_offset(renderSize.x, gid);
   gidOffset1 *= 2;
-
-  uint gidOffset2 = gidOffset1 + 1;
   
   // Convert to (X,Y) coords in terms of input width
   ushort2 b1Coords = offset_to_coords(inTexture.get_width(), gidOffset1);
-  ushort2 b2Coords = offset_to_coords(inTexture.get_width(), gidOffset2);
+  ushort2 b2Coords = b1Coords;
+  b2Coords.x += 1;
   
   uint8_t b1 = uint8_from_half(inTexture.read(b1Coords).x);
   uint8_t b2 = uint8_from_half(inTexture.read(b2Coords).x);
@@ -158,11 +157,10 @@ fragmentShaderPrefixSumReduceA7(RasterizerData in [[stage_in]],
   uint gidOffset1 = coords_to_offset(renderSize.x, gid);
   gidOffset1 *= 2;
   
-  uint gidOffset2 = gidOffset1 + 1;
-  
   // Convert to (X,Y) coords in terms of input width
   ushort2 b1Coords = offset_to_coords(inTexture.get_width(), gidOffset1);
-  ushort2 b2Coords = offset_to_coords(inTexture.get_width(), gidOffset2);
+  ushort2 b2Coords = b1Coords;
+  b2Coords.x += 1;
   
   uint8_t b1 = uint8_from_half(inTexture.read(b1Coords).x);
   uint8_t b2 = uint8_from_half(inTexture.read(b2Coords).x);
