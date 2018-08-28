@@ -18,8 +18,8 @@
 
 // Prefix Sum Reduce step
 
-@property (nonatomic, retain) id<MTLRenderPipelineState> reduceSquarePipelineState;
-@property (nonatomic, retain) id<MTLRenderPipelineState> reduceRectPipelineState;
+@property (nonatomic, retain) id<MTLRenderPipelineState> reducePipelineState;
+@property (nonatomic, retain) id<MTLRenderPipelineState> sweepPipelineState;
 
 #if defined(DEBUG)
 
@@ -45,6 +45,13 @@
 - (void) renderPrefixSumReduce:(MetalRenderContext*)mrc
                  commandBuffer:(id<MTLCommandBuffer>)commandBuffer
                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
+
+- (void) renderPrefixSumSweep:(MetalRenderContext*)mrc
+                commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+                  renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+                inputTexture1:(id<MTLTexture>)inputTexture1
+                inputTexture2:(id<MTLTexture>)inputTexture2
+                outputTexture:(id<MTLTexture>)outputTexture;
 
 #if defined(DEBUG)
 

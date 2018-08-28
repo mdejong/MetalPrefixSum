@@ -44,6 +44,7 @@
 
 @property (nonatomic, retain) NSMutableArray *reduceTextures;
 @property (nonatomic, retain) NSMutableArray *sweepTextures;
+@property (nonatomic, retain) id<MTLTexture> zeroTexture;
 
 #if defined(DEBUG)
 

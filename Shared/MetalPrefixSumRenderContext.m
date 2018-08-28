@@ -43,13 +43,25 @@
     sumReduceShader = sumReduceShaderA7;
   }
   
-  self.reduceSquarePipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
-                                                   pipelineLabel:@"PrefixSumReduce Square Pipeline"
+  self.reducePipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
+                                                   pipelineLabel:@"PrefixSumReduce Pipeline"
                                                   numAttachments:1
                                               vertexFunctionName:@"vertexShader"
                                             fragmentFunctionName:sumReduceShader];
   
-  NSAssert(self.reduceSquarePipelineState, @"reduceSquarePipelineState");
+  NSAssert(self.reducePipelineState, @"reducePipelineState");
+
+  // FIXME: A7 support
+  
+  NSString *sumSweepShader = @"fragmentShaderPrefixSumDownSweep";
+  
+  self.sweepPipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
+                                 pipelineLabel:@"PrefixSumSweep Pipeline"
+                                numAttachments:1
+                            vertexFunctionName:@"vertexShader"
+                          fragmentFunctionName:sumSweepShader];
+  
+  NSAssert(self.sweepPipelineState, @"sweepPipelineState");
   
 #if defined(DEBUG)
   
@@ -176,6 +188,8 @@
     
     txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageShaderRead];
     
+    renderFrame.zeroTexture = txt;
+    
     NSLog(@"zeros : texture %d x %d", textureWidth, textureHeight);
   }
   
@@ -300,23 +314,110 @@
 #if defined(DEBUG)
     assert(renderEncoder);
 #endif // DEBUG
-    
-    renderEncoder.label = @"PrefixSumReduceD1";
-    
-    [renderEncoder pushDebugGroup: @"PrefixSumReduceD1"];
+
+    NSString *debugLabel = [NSString stringWithFormat:@"PrefixSumReduce%d", 1];
+    renderEncoder.label = debugLabel;
+    [renderEncoder pushDebugGroup:debugLabel];
     
     // Set the region of the drawable to which we'll draw.
     
     MTLViewport mtlvp = {0.0, 0.0, outputTexture.width, outputTexture.height, -1.0, 1.0 };
     [renderEncoder setViewport:mtlvp];
     
-    [renderEncoder setRenderPipelineState:self.reduceSquarePipelineState];
+    [renderEncoder setRenderPipelineState:self.reducePipelineState];
     
     [renderEncoder setVertexBuffer:mrc.identityVerticesBuffer
                             offset:0
                            atIndex:AAPLVertexInputIndexVertices];
     
     [renderEncoder setFragmentTexture:renderFrame.inputBlockOrderTexture atIndex:0];
+    
+    [renderEncoder setFragmentBuffer:renderFrame.renderTargetDimensionsAndBlockDimensionsUniform
+                              offset:0
+                             atIndex:0];
+    
+    // Draw the 3 vertices of our triangle
+    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
+                      vertexStart:0
+                      vertexCount:mrc.identityNumVertices];
+    
+    [renderEncoder popDebugGroup]; // RenderToTexture
+    
+    [renderEncoder endEncoding];
+  }
+}
+
+// Prefix sum sweep, this executes a single sweep step
+
+- (void) renderPrefixSumSweep:(MetalRenderContext*)mrc
+                commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+                  renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+                inputTexture1:(id<MTLTexture>)inputTexture1
+                inputTexture2:(id<MTLTexture>)inputTexture2
+                outputTexture:(id<MTLTexture>)outputTexture
+{
+#if defined(DEBUG)
+  assert(mrc);
+  assert(commandBuffer);
+  assert(renderFrame);
+#endif // DEBUG
+  
+  MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+  
+  if (renderPassDescriptor != nil)
+  {
+    // FIXME: determine how to grab I/O textures from level argument ?
+    
+    // Reduce depth=1 output texture
+    //id<MTLTexture> inputTexture = renderFrame.inputBlockOrderTexture;
+    //id<MTLTexture> outputTexture = (id<MTLTexture>) renderFrame.reduceTextures[0];
+    
+#if defined(DEBUG)
+    // Output of a square reduce is 1/2 the width
+    // Output of a rect reduce is 1/2 the height
+    
+    assert(inputTexture2.width == outputTexture.width);
+    assert(inputTexture2.height == outputTexture.height);
+    
+    if (inputTexture1.width == inputTexture1.height) {
+      // square
+      assert(inputTexture1.width == outputTexture.width);
+      assert((inputTexture1.height * 2) == outputTexture.height);
+    } else {
+      // rect
+      assert((inputTexture1.width * 2) == outputTexture.width);
+      assert(inputTexture1.height == outputTexture.height);
+    }
+#endif // DEBUG
+    
+    renderPassDescriptor.colorAttachments[0].texture = outputTexture;
+    renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
+    renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    
+    id <MTLRenderCommandEncoder> renderEncoder =
+    [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
+    
+#if defined(DEBUG)
+    assert(renderEncoder);
+#endif // DEBUG
+    
+    NSString *debugLabel = [NSString stringWithFormat:@"PrefixSumSweep%d", 1];
+    renderEncoder.label = debugLabel;
+    [renderEncoder pushDebugGroup:debugLabel];
+    
+    // Set the region of the drawable to which we'll draw.
+    
+    MTLViewport mtlvp = {0.0, 0.0, outputTexture.width, outputTexture.height, -1.0, 1.0 };
+    [renderEncoder setViewport:mtlvp];
+    
+    [renderEncoder setRenderPipelineState:self.sweepPipelineState];
+    
+    [renderEncoder setVertexBuffer:mrc.identityVerticesBuffer
+                            offset:0
+                           atIndex:AAPLVertexInputIndexVertices];
+    
+    [renderEncoder setFragmentTexture:inputTexture1 atIndex:0];
+    [renderEncoder setFragmentTexture:inputTexture2 atIndex:1];
     
     [renderEncoder setFragmentBuffer:renderFrame.renderTargetDimensionsAndBlockDimensionsUniform
                               offset:0
