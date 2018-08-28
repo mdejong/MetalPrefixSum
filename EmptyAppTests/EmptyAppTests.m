@@ -1364,4 +1364,111 @@
   XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
 }
 
+// Sweep up to 4x4
+
+- (void)testMetalSweep2x4to4x4 {
+  NSArray *epectedInputArr1 = @[
+                                @(0), @(1), @(2), @(3), @(4), @(5), @(6), @(7),
+                                ];
+  
+  NSArray *epectedInputArr2 = @[
+                                @(10), @(20), @(30), @(40), @(50), @(60), @(70), @(80),
+                                @(90), @(100), @(110), @(120), @(130), @(140), @(150), @(160)
+                                ];
+  
+  NSArray *epectedRenderedArr = @[
+                                  // 0 -> (10,20)
+                                  @(0), @(10),
+                                  // 1 -> (30, 40)
+                                  @(1), @(31),
+                                  // 2 -> (50, 60)
+                                  @(2), @(52),
+                                  // 3 -> (70, 80)
+                                  @(3), @(73),
+                                  // 4 -> (90, 100)
+                                  @(4), @(94),
+                                  // 5 -> (110, 120)
+                                  @(5), @(115),
+                                  // 6 -> (130, 140)
+                                  @(6), @(136),
+                                  // 7 -> (150, 160)
+                                  @(7), @(157)
+                                  ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(4, 4);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture1.width == 2);
+  XCTAssert(inputTexture1.height == 4);
+  
+  XCTAssert(inputTexture2.width == 4);
+  XCTAssert(inputTexture2.height == 4);
+  
+  XCTAssert(outputTexture.width == 4);
+  XCTAssert(outputTexture.height == 4);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture1 bytesArray:epectedInputArr1 mrc:mrc];
+  [self fill8BitTexture:inputTexture2 bytesArray:epectedInputArr2 mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture1 label:@"inputTexture1"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture2 label:@"inputTexture2"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *input1Arr = [self arrayFrom8BitTexture:inputTexture1];
+  XCTAssert([input1Arr isEqualToArray:epectedInputArr1]);
+  
+  NSArray *input2Arr = [self arrayFrom8BitTexture:inputTexture2];
+  XCTAssert([input2Arr isEqualToArray:epectedInputArr2]);
+  
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+}
+
 @end
