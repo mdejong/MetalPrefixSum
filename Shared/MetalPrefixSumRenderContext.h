@@ -35,8 +35,7 @@
 
 - (void) setupRenderTextures:(MetalRenderContext*)mrc
                   renderSize:(CGSize)renderSize
-                 renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
-              blockDimension:(int)blockDimension;
+                 renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 // Specific render operations
 

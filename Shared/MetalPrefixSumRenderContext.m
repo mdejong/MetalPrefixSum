@@ -79,13 +79,13 @@
 // Render textures initialization
 // renderSize : indicates the size of the entire texture containing block by block numbers
 // renderFrame : holds textures used while rendering
-// blockDimension : indicates the POT dimension, a 4x4 size block is indicated by the value 4
 
 - (void) setupRenderTextures:(MetalRenderContext*)mrc
                   renderSize:(CGSize)renderSize
                  renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
-               blockDimension:(int)blockDimension
 {
+  const bool debug = true;
+  
   unsigned int width = renderSize.width;
   unsigned int height = renderSize.height;
 
@@ -95,24 +95,6 @@
   renderFrame.height = height;
   renderFrame.blockDim = blockDim;
   
-  // The number of iterations needed to reduce a blockDimension x blockDimension
-  // sized block down to just 1 value (not including the final render to 1 pixel).
-  
-  int totalNumPixels = (int) (blockDimension * blockDimension);
-  
-  int numReductions = 0;
-  
-  for (int i = 0; i < 32; i++) {
-    totalNumPixels /= 2;
-    if (totalNumPixels == 1) {
-      // No reduction down to just 1 pixel is needed
-      break;
-    }
-    numReductions += 1;
-  }
-  
-  NSLog(@"for %d x %d block dimension : numReductions %d", blockDimension, blockDimension, numReductions);
-
   // Texture that holds block order input bytes
   
   {
@@ -141,7 +123,9 @@
   
   int pot = 1;
   
-  for (int i = 0; i < numReductions; i++) {
+  const int maxNumReductions = log2(4096);
+  
+  for (int i = 0; i < maxNumReductions; i++) {
     if (textureWidth == textureHeight) {
       // square texture to rect of 1/2 the width
       textureWidth = textureWidth / 2;
@@ -150,9 +134,15 @@
       textureHeight = textureHeight / 2;
     }
     
+    if (textureWidth == 1 && textureHeight == 1) {
+      break;
+    }
+    
     int reduceStep = i + 1;
     
+    if (debug) {
     NSLog(@"reduction %d : texture %3d x %3d : POT %d", reduceStep, textureWidth, textureHeight, pot);
+    }
     
     id<MTLTexture> txt;
     
@@ -160,7 +150,9 @@
 
     [renderFrame.reduceTextures addObject:txt];
     
+    if (debug) {
     NSLog(@"sweep     %d : texture %3d x %3d : POT %d", reduceStep, textureWidth, textureHeight, pot);
+    }
     
     txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
@@ -176,19 +168,16 @@
   {
     id<MTLTexture> txt;
     
-    if (textureWidth == textureHeight) {
-      // square texture to rect of 1/2 the width
-      textureWidth = textureWidth / 2;
-    } else {
-      // rect texture to square that is 1/2 the height
-      textureHeight = textureHeight / 2;
-    }
+    assert(textureWidth == 1);
+    assert(textureHeight == 1);
     
     txt = [mrc make8bitTexture:CGSizeMake(textureWidth, textureHeight) bytes:NULL usage:MTLTextureUsageShaderRead];
     
     renderFrame.zeroTexture = txt;
     
+    if (debug) {
     NSLog(@"zeros : texture %d x %d", textureWidth, textureHeight);
+    }
   }
   
   // Dimensions passed into shaders
