@@ -35,8 +35,8 @@
 {
   NSUInteger gpuFamily = [mrc featureSetGPUFamily];
 
-  NSString *sumReduceShaderA7 = @"fragmentShaderPrefixSumReduceA7";
   NSString *sumReduceShader = @"fragmentShaderPrefixSumReduce";
+  NSString *sumReduceShaderA7 = @"fragmentShaderPrefixSumReduceA7";
   
   if (gpuFamily == 1) {
     // A7

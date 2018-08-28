@@ -90,17 +90,9 @@ typedef struct
 
 fragment half
 fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
-                                    texture2d<half, access::read> inTexture [[ texture(0) ]],
-                                    constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
+                              texture2d<half, access::read> inTexture [[ texture(0) ]],
+                              constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
 {
-//  const ushort2 renderSize = ushort2(inTexture.get_width() / 2, inTexture.get_height());
-//  ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
-//  gid.x *= 2;
-//  ushort2 gid2 = gid;
-//  gid2.x += 1;
-
-  // 0123 4567 89AB
-
   ushort2 renderSize;
   
   // FIXME: pass output render size in rtd ?
@@ -137,38 +129,19 @@ fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
   // return just the second value read
   //return uint8_to_half(b2);
   
-  //return uint8_to_half(b1 + b2);
+  // This logic is known to optimize properly
+  // on newer than A7 devices but it fails on A7
   
-  /*
-  // Note that dividing by 255.0h results in a bug on A7
-  // while a float divide does not generate the optimization.
-  
-  ushort b1 = ushort_from_half(inTexture.read(b1Coords).x);
-  ushort b2 = ushort_from_half(inTexture.read(b2Coords).x);
-  
-  ushort shortSum = b1 + b2;
-  shortSum &= 0xFF;
-  return half(shortSum / 255.0);
-  */
-  
-  // This should work properly on A7 but it does not
-  
-  //return uint8_to_half(b1 + b2);
-  
-  // This should work properly on A7 but it does not
-  
-  //uint8_t sum = b1 + b2;
-  //return half(ushort(sum) / 255.0h);
-  
-  // This does work properly on A7
-  uint8_t sum = b1 + b2;
-  return half(ushort(sum) / 255.0);
+  return uint8_to_half(b1 + b2);
 }
+
+// Same logic as shader above with workaround specific to A7
+// related to converting the sum of 2 reads to byte and then back to float.
 
 fragment half
 fragmentShaderPrefixSumReduceA7(RasterizerData in [[stage_in]],
-                              texture2d<half, access::read> inTexture [[ texture(0) ]],
-                              constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
+                                texture2d<half, access::read> inTexture [[ texture(0) ]],
+                                constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
 {
   ushort2 renderSize;
   
