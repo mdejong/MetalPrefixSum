@@ -276,4 +276,36 @@
   return state;
 }
 
+- (NSUInteger)highestSupportedFeatureSet
+{
+  const NSUInteger maxKnownFeatureSet = MTLFeatureSet_iOS_GPUFamily2_v1;
+  
+  for (int featureSet = maxKnownFeatureSet; featureSet >= 0; --featureSet)
+  {
+    if ([self.device supportsFeatureSet:featureSet])
+    {
+      return featureSet;
+    }
+  }
+  
+  return MTLFeatureSet_iOS_GPUFamily1_v1;
+}
+
+- (NSUInteger)featureSetGPUFamily
+{
+  switch (self.highestSupportedFeatureSet)
+  {
+    case MTLFeatureSet_iOS_GPUFamily2_v1:
+      return 2;
+    case MTLFeatureSet_iOS_GPUFamily1_v1:
+    default:
+      return 1;
+  }
+}
+
+- (BOOL)supportsASTCPixelFormats
+{
+  return (self.featureSetGPUFamily > 1);
+}
+
 @end

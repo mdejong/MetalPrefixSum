@@ -21,6 +21,16 @@
 @property (nonatomic, retain) id<MTLBuffer> identityVerticesBuffer;
 @property (nonatomic, assign) int identityNumVertices;
 
+// Query GPU feature set flags
+
+@property (readonly) NSUInteger highestSupportedFeatureSet;
+
+// Return 1 for A7, otherwise returns 2
+
+@property (readonly) NSUInteger featureSetGPUFamily;
+
+@property (readonly) BOOL supportsASTCPixelFormats;
+
 // Invoke this method once a MetalRenderFrame object has been created
 // to allocate and create metal resources with the given device instance.
 

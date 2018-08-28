@@ -153,12 +153,68 @@ fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
   
   // This should work properly on A7 but it does not
   
-  /*
-  uint8_t sum = b1 + b2;
-  return half(ushort(sum) / 255.0h);
-  */
+  //return uint8_to_half(b1 + b2);
+  
+  // This should work properly on A7 but it does not
+  
+  //uint8_t sum = b1 + b2;
+  //return half(ushort(sum) / 255.0h);
   
   // This does work properly on A7
+  uint8_t sum = b1 + b2;
+  return half(ushort(sum) / 255.0);
+}
+
+fragment half
+fragmentShaderPrefixSumReduceA7(RasterizerData in [[stage_in]],
+                              texture2d<half, access::read> inTexture [[ texture(0) ]],
+                              constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
+{
+  ushort2 renderSize;
+  
+  if (inTexture.get_width() == inTexture.get_height()) {
+    // Reduce Square
+    renderSize = ushort2(inTexture.get_width() / 2, inTexture.get_height());
+  } else {
+    // Reduce Rect
+    renderSize = ushort2(inTexture.get_width(), inTexture.get_height() / 2);
+  }
+  
+  ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
+  
+  uint gidOffset1 = coords_to_offset(renderSize.x, gid);
+  gidOffset1 *= 2;
+  
+  uint gidOffset2 = gidOffset1 + 1;
+  
+  // Convert to (X,Y) coords in terms of input width
+  ushort2 b1Coords = offset_to_coords(inTexture.get_width(), gidOffset1);
+  ushort2 b2Coords = offset_to_coords(inTexture.get_width(), gidOffset2);
+  
+  uint8_t b1 = uint8_from_half(inTexture.read(b1Coords).x);
+  uint8_t b2 = uint8_from_half(inTexture.read(b2Coords).x);
+  
+  // width of render texture
+  //return uint8_to_half(renderSize.x);
+  // height of render texture
+  //return uint8_to_half(renderSize.y);
+  
+  // return just the first value read
+  //return uint8_to_half(b1);
+  // return just the second value read
+  //return uint8_to_half(b2);
+  
+  // This should work properly on A7 but it does not
+  
+  //return uint8_to_half(b1 + b2);
+  
+  // This should work properly on A7 but it does not
+  
+  // uint8_t sum = b1 + b2;
+  // return half(ushort(sum) / 255.0h);
+  
+  // This does work properly on A7, note the
+  // literal here is a float value not a half float.
   uint8_t sum = b1 + b2;
   return half(ushort(sum) / 255.0);
 }

@@ -33,11 +33,21 @@
 
 - (void) setupRenderPipelines:(MetalRenderContext*)mrc
 {
+  NSUInteger gpuFamily = [mrc featureSetGPUFamily];
+
+  NSString *sumReduceShaderA7 = @"fragmentShaderPrefixSumReduceA7";
+  NSString *sumReduceShader = @"fragmentShaderPrefixSumReduce";
+  
+  if (gpuFamily == 1) {
+    // A7
+    sumReduceShader = sumReduceShaderA7;
+  }
+  
   self.reduceSquarePipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
                                                    pipelineLabel:@"PrefixSumReduce Square Pipeline"
                                                   numAttachments:1
                                               vertexFunctionName:@"vertexShader"
-                                            fragmentFunctionName:@"fragmentShaderPrefixSumReduce"];
+                                            fragmentFunctionName:sumReduceShader];
   
   NSAssert(self.reduceSquarePipelineState, @"reduceSquarePipelineState");
   
