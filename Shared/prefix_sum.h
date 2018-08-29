@@ -18,7 +18,7 @@
 // of the reduced output array.
 
 static inline
-void PrefisSum_reduce(uint8_t *inBytes, int inNumBytes,
+void PrefixSum_reduce(uint8_t *inBytes, int inNumBytes,
                       uint8_t *outBytes, int outNumBytes)
 {
 #if defined(DEBUG)
@@ -48,6 +48,64 @@ void PrefisSum_reduce(uint8_t *inBytes, int inNumBytes,
 #if defined(DEBUG)
     assert(offset < outNumBytes);
 #endif // DEBUG
+    outBytes[offset] = sumByte;
+  }
+}
+
+// Prefix sum downsweep, read input texture1
+// and previously reduced texture2.
+
+static inline
+void PrefixSum_downsweep(uint8_t *inBytes1, int inNumBytes1,
+                         uint8_t *inBytes2, int inNumBytes2,
+                         uint8_t *outBytes, int outNumBytes)
+{
+  const int debug = 0;
+  
+#if defined(DEBUG)
+  assert((inNumBytes1 * 2) == outNumBytes);
+  assert(outNumBytes == inNumBytes2);
+#endif // DEBUG
+  
+  for ( int offset = 0; offset < outNumBytes; offset++ ) {
+    // t1Offset is the offset in t1 that is read from unconditionally
+    int t1Offset = offset / 2;
+    
+#if defined(DEBUG)
+    assert(t1Offset < inNumBytes1);
+#endif // DEBUG
+    
+    uint8_t t1Byte = inBytes1[t1Offset];
+    
+    // Second byte is loaded from inBytes2
+    
+    int t2Offset = offset - 1;
+    
+    uint8_t t2Byte;
+    
+    if ((offset & 0x1) == 0) {
+      // even
+      t2Byte = 0;
+    } else {
+      // odd
+#if defined(DEBUG)
+      assert(t2Offset < inNumBytes2);
+#endif // DEBUG
+      t2Byte = inBytes2[t2Offset];
+    }
+    
+    uint8_t sumByte = t1Byte + t2Byte;
+    
+#if defined(DEBUG)
+    assert(offset < outNumBytes);
+#endif // DEBUG
+    
+    if (debug) {
+      printf("t1 %d : inBytes1[%3d]\n", t1Byte, t1Offset);
+      printf("t2 %d : inBytes2[%3d]\n", t2Byte, t2Offset);
+      printf("outBytes[%3d] = %d\n", offset, sumByte);
+    }
+    
     outBytes[offset] = sumByte;
   }
 }

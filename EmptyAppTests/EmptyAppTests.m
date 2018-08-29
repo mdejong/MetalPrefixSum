@@ -139,14 +139,14 @@
 }
 
 - (void)testMetalReduce4x4To2x4 {
-  NSArray *epectedInputArr = @[
+  NSArray *expectedInputArr = @[
                                @0, @1, @2, @3,
                                @4, @5, @6, @7,
                                @8, @9, @10, @11,
                                @12, @13, @14, @15
                                ];
   
-  NSArray *epectedRenderedArr = @[
+  NSArray *expectedRenderedArr = @[
                                   @1, @5,
                                   @9, @13,
                                   @17, @21,
@@ -177,7 +177,7 @@
   
   // fill inputTexture
 
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -212,19 +212,19 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
 - (void)testMetalReduce2x4To2x2 {
-  NSArray *epectedInputArr = @[
+  NSArray *expectedInputArr = @[
                                @(0 + 1), @(2 + 3),
                                @(4 + 5), @(6 + 7),
                                @(8 + 9), @(10 + 11),
                                @(12 + 13), @(14 + 15)
                                ];
   
-  NSArray *epectedRenderedArr = @[
+  NSArray *expectedRenderedArr = @[
                                   @(1+5),   @(9+13),
                                   @(17+21), @(25+29)
                                   ];
@@ -253,7 +253,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -288,17 +288,17 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
 - (void)testMetalReduce2x2To1x2 {
-  NSArray *epectedInputArr = @[
+  NSArray *expectedInputArr = @[
                                @(1+5),   @(9+13),
                                @(17+21), @(25+29)
                                ];
   
-  NSArray *epectedRenderedArr = @[
+  NSArray *expectedRenderedArr = @[
                                   @(1+5+9+13),
                                   @(17+21+25+29)
                                   ];
@@ -327,7 +327,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -362,8 +362,8 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
 //- (void)testPerformanceExample {
@@ -376,7 +376,7 @@
 // Test 32 x 32 input case that gets reduced down to 16x32
 
 - (void)testMetalReduce32x32To16x32 {
-  NSMutableArray *epectedInputArr = [NSMutableArray array];
+  NSMutableArray *expectedInputArr = [NSMutableArray array];
   
   {
     int width = 32;
@@ -386,22 +386,22 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         uint8_t offsetAsByte = offset & 0xFF;
-        [epectedInputArr addObject:@(offsetAsByte)];
+        [expectedInputArr addObject:@(offsetAsByte)];
       }
     }
   }
   
   // Reduce 32x32 down to 16x32
   
-  NSMutableData *epectedInputData = [Util bytesArrayToData:epectedInputArr];
-  NSMutableData *epectedRenderedData = [NSMutableData dataWithLength:epectedInputData.length/2];
+  NSMutableData *expectedInputData = [Util bytesArrayToData:expectedInputArr];
+  NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInputData.length/2];
   
-  PrefisSum_reduce((uint8_t*)epectedInputData.bytes, (int)epectedInputData.length,
-                   (uint8_t*)epectedRenderedData.bytes, (int)epectedRenderedData.length);
+  PrefixSum_reduce((uint8_t*)expectedInputData.bytes, (int)expectedInputData.length,
+                   (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
   
   // Convert prefix sum reduction back to NSArray
   
-  NSArray *epectedRenderedArr = [Util byteDataToArray:epectedRenderedData];
+  NSArray *expectedRenderedArr = [Util byteDataToArray:expectedRenderedData];
   
   {
     int width = 16;
@@ -415,7 +415,7 @@
           offset = 58;
         }
         
-        uint8_t *ptr = (uint8_t *) epectedRenderedData.bytes;
+        uint8_t *ptr = (uint8_t *) expectedRenderedData.bytes;
         int sumByte = ptr[offset];
         
         if (offset == 58) {
@@ -450,7 +450,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -485,9 +485,9 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
   
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
   
   {
     int width = 16;
@@ -497,7 +497,7 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         
-        NSNumber *expectedNum = epectedRenderedArr[offset];
+        NSNumber *expectedNum = expectedRenderedArr[offset];
         NSNumber *renderedNum = renderedArr[offset];
         
         BOOL same = [renderedNum isEqualToNumber:expectedNum];
@@ -515,7 +515,7 @@
 // Test 16 x 32 input case that gets reduced down to 16x16
 
 - (void)testMetalReduce16x32To16x16 {
-  NSMutableArray *epectedInputArr = [NSMutableArray array];
+  NSMutableArray *expectedInputArr = [NSMutableArray array];
   
   {
     int width = 16;
@@ -525,20 +525,20 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         uint8_t offsetAsByte = offset & 0xFF;
-        [epectedInputArr addObject:@(offsetAsByte)];
+        [expectedInputArr addObject:@(offsetAsByte)];
       }
     }
   }
   
-  NSMutableData *epectedInputData = [Util bytesArrayToData:epectedInputArr];
-  NSMutableData *epectedRenderedData = [NSMutableData dataWithLength:epectedInputData.length/2];
+  NSMutableData *expectedInputData = [Util bytesArrayToData:expectedInputArr];
+  NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInputData.length/2];
   
-  PrefisSum_reduce((uint8_t*)epectedInputData.bytes, (int)epectedInputData.length,
-                   (uint8_t*)epectedRenderedData.bytes, (int)epectedRenderedData.length);
+  PrefixSum_reduce((uint8_t*)expectedInputData.bytes, (int)expectedInputData.length,
+                   (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
   
   // Convert prefix sum reduction back to NSArray
   
-  NSArray *epectedRenderedArr = [Util byteDataToArray:epectedRenderedData];
+  NSArray *expectedRenderedArr = [Util byteDataToArray:expectedRenderedData];
   
   {
     int width = 16;
@@ -552,7 +552,7 @@
           offset = 58;
         }
         
-        uint8_t *ptr = (uint8_t *) epectedRenderedData.bytes;
+        uint8_t *ptr = (uint8_t *) expectedRenderedData.bytes;
         int sumByte = ptr[offset];
         
         if (offset == 58) {
@@ -587,7 +587,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -622,9 +622,9 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
   
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
   
   {
     int width = 16;
@@ -634,7 +634,7 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         
-        NSNumber *expectedNum = epectedRenderedArr[offset];
+        NSNumber *expectedNum = expectedRenderedArr[offset];
         NSNumber *renderedNum = renderedArr[offset];
         
         BOOL same = [renderedNum isEqualToNumber:expectedNum];
@@ -652,7 +652,7 @@
 // Test 16 x 16 input case that gets reduced down to 8x16
 
 - (void)testMetalReduce16x16To8x16 {
-  NSMutableArray *epectedInputArr = [NSMutableArray array];
+  NSMutableArray *expectedInputArr = [NSMutableArray array];
   
   {
     int width = 16;
@@ -662,20 +662,20 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         uint8_t offsetAsByte = offset & 0xFF;
-        [epectedInputArr addObject:@(offsetAsByte)];
+        [expectedInputArr addObject:@(offsetAsByte)];
       }
     }
   }
   
-  NSMutableData *epectedInputData = [Util bytesArrayToData:epectedInputArr];
-  NSMutableData *epectedRenderedData = [NSMutableData dataWithLength:epectedInputData.length/2];
+  NSMutableData *expectedInputData = [Util bytesArrayToData:expectedInputArr];
+  NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInputData.length/2];
   
-  PrefisSum_reduce((uint8_t*)epectedInputData.bytes, (int)epectedInputData.length,
-                   (uint8_t*)epectedRenderedData.bytes, (int)epectedRenderedData.length);
+  PrefixSum_reduce((uint8_t*)expectedInputData.bytes, (int)expectedInputData.length,
+                   (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
   
   // Convert prefix sum reduction back to NSArray
   
-  NSArray *epectedRenderedArr = [Util byteDataToArray:epectedRenderedData];
+  NSArray *expectedRenderedArr = [Util byteDataToArray:expectedRenderedData];
   
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   
@@ -701,7 +701,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -736,9 +736,9 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
   
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
   
   {
     int width = 8;
@@ -748,7 +748,7 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         
-        NSNumber *expectedNum = epectedRenderedArr[offset];
+        NSNumber *expectedNum = expectedRenderedArr[offset];
         NSNumber *renderedNum = renderedArr[offset];
         
         BOOL same = [renderedNum isEqualToNumber:expectedNum];
@@ -765,7 +765,7 @@
 // Test 16 x 16 input case that gets reduced down to 8x16
 
 - (void)testMetalReduce8x16To8x8 {
-  NSMutableArray *epectedInputArr = [NSMutableArray array];
+  NSMutableArray *expectedInputArr = [NSMutableArray array];
   
   {
     int width = 8;
@@ -775,20 +775,20 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         uint8_t offsetAsByte = offset & 0xFF;
-        [epectedInputArr addObject:@(offsetAsByte)];
+        [expectedInputArr addObject:@(offsetAsByte)];
       }
     }
   }
   
-  NSMutableData *epectedInputData = [Util bytesArrayToData:epectedInputArr];
-  NSMutableData *epectedRenderedData = [NSMutableData dataWithLength:epectedInputData.length/2];
+  NSMutableData *expectedInputData = [Util bytesArrayToData:expectedInputArr];
+  NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInputData.length/2];
   
-  PrefisSum_reduce((uint8_t*)epectedInputData.bytes, (int)epectedInputData.length,
-                   (uint8_t*)epectedRenderedData.bytes, (int)epectedRenderedData.length);
+  PrefixSum_reduce((uint8_t*)expectedInputData.bytes, (int)expectedInputData.length,
+                   (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
   
   // Convert prefix sum reduction back to NSArray
   
-  NSArray *epectedRenderedArr = [Util byteDataToArray:epectedRenderedData];
+  NSArray *expectedRenderedArr = [Util byteDataToArray:expectedRenderedData];
   
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   
@@ -814,7 +814,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -849,9 +849,9 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
   
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
   
   {
     int width = 8;
@@ -861,7 +861,7 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         
-        NSNumber *expectedNum = epectedRenderedArr[offset];
+        NSNumber *expectedNum = expectedRenderedArr[offset];
         NSNumber *renderedNum = renderedArr[offset];
         
         BOOL same = [renderedNum isEqualToNumber:expectedNum];
@@ -878,7 +878,7 @@
 // Test 8x8 input case that gets reduced down to 4x8
 
 - (void)testMetalReduce8x8To4x8 {
-  NSMutableArray *epectedInputArr = [NSMutableArray array];
+  NSMutableArray *expectedInputArr = [NSMutableArray array];
   
   {
     int width = 8;
@@ -888,20 +888,20 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         uint8_t offsetAsByte = offset & 0xFF;
-        [epectedInputArr addObject:@(offsetAsByte)];
+        [expectedInputArr addObject:@(offsetAsByte)];
       }
     }
   }
   
-  NSMutableData *epectedInputData = [Util bytesArrayToData:epectedInputArr];
-  NSMutableData *epectedRenderedData = [NSMutableData dataWithLength:epectedInputData.length/2];
+  NSMutableData *expectedInputData = [Util bytesArrayToData:expectedInputArr];
+  NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInputData.length/2];
   
-  PrefisSum_reduce((uint8_t*)epectedInputData.bytes, (int)epectedInputData.length,
-                   (uint8_t*)epectedRenderedData.bytes, (int)epectedRenderedData.length);
+  PrefixSum_reduce((uint8_t*)expectedInputData.bytes, (int)expectedInputData.length,
+                   (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
   
   // Convert prefix sum reduction back to NSArray
   
-  NSArray *epectedRenderedArr = [Util byteDataToArray:epectedRenderedData];
+  NSArray *expectedRenderedArr = [Util byteDataToArray:expectedRenderedData];
   
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   
@@ -927,7 +927,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -962,9 +962,9 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
   
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
   
   {
     int width = 4;
@@ -974,7 +974,7 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         
-        NSNumber *expectedNum = epectedRenderedArr[offset];
+        NSNumber *expectedNum = expectedRenderedArr[offset];
         NSNumber *renderedNum = renderedArr[offset];
         
         BOOL same = [renderedNum isEqualToNumber:expectedNum];
@@ -991,7 +991,7 @@
 // Test 4x8 input case that gets reduced down to 4x4
 
 - (void)testMetalReduce4x8To4x4 {
-  NSMutableArray *epectedInputArr = [NSMutableArray array];
+  NSMutableArray *expectedInputArr = [NSMutableArray array];
   
   {
     int width = 4;
@@ -1001,20 +1001,20 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         uint8_t offsetAsByte = offset & 0xFF;
-        [epectedInputArr addObject:@(offsetAsByte)];
+        [expectedInputArr addObject:@(offsetAsByte)];
       }
     }
   }
   
-  NSMutableData *epectedInputData = [Util bytesArrayToData:epectedInputArr];
-  NSMutableData *epectedRenderedData = [NSMutableData dataWithLength:epectedInputData.length/2];
+  NSMutableData *expectedInputData = [Util bytesArrayToData:expectedInputArr];
+  NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInputData.length/2];
   
-  PrefisSum_reduce((uint8_t*)epectedInputData.bytes, (int)epectedInputData.length,
-                   (uint8_t*)epectedRenderedData.bytes, (int)epectedRenderedData.length);
+  PrefixSum_reduce((uint8_t*)expectedInputData.bytes, (int)expectedInputData.length,
+                   (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
   
   // Convert prefix sum reduction back to NSArray
   
-  NSArray *epectedRenderedArr = [Util byteDataToArray:epectedRenderedData];
+  NSArray *expectedRenderedArr = [Util byteDataToArray:expectedRenderedData];
   
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   
@@ -1040,7 +1040,7 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture bytesArray:epectedInputArr mrc:mrc];
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -1075,9 +1075,9 @@
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
   
-  XCTAssert([inputArr isEqualToArray:epectedInputArr]);
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
   
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
   
   {
     int width = 4;
@@ -1087,7 +1087,7 @@
       for ( int col = 0; col < width; col++ ) {
         int offset = (row * width) + col;
         
-        NSNumber *expectedNum = epectedRenderedArr[offset];
+        NSNumber *expectedNum = expectedRenderedArr[offset];
         NSNumber *renderedNum = renderedArr[offset];
         
         BOOL same = [renderedNum isEqualToNumber:expectedNum];
@@ -1104,16 +1104,16 @@
 // Sweep up to 1x2
 
 - (void)testMetalSweep1x1to1x2 {
-  NSArray *epectedInputArr1 = @[
+  NSArray *expectedInputArr1 = @[
                                @(0)
                                ];
   
-  NSArray *epectedInputArr2 = @[
+  NSArray *expectedInputArr2 = @[
                                @(1),
                                @(2)
                                ];
   
-  NSArray *epectedRenderedArr = @[
+  NSArray *expectedRenderedArr = @[
                                   @(0),
                                   @(1)
                                   ];
@@ -1143,8 +1143,8 @@
   
   // fill inputTexture
 
-  [self fill8BitTexture:inputTexture1 bytesArray:epectedInputArr1 mrc:mrc];
-  [self fill8BitTexture:inputTexture2 bytesArray:epectedInputArr2 mrc:mrc];
+  [self fill8BitTexture:inputTexture1 bytesArray:expectedInputArr1 mrc:mrc];
+  [self fill8BitTexture:inputTexture2 bytesArray:expectedInputArr2 mrc:mrc];
   
   // Get a metal command buffer
   
@@ -1177,29 +1177,44 @@
   if (dump) {
     [self dump8BitTexture:outputTexture label:@"outputTexture"];
   }
+  
+  {
+    NSMutableData *expectedInput1Data = [Util bytesArrayToData:expectedInputArr1];
+    NSMutableData *expectedInput2Data = [Util bytesArrayToData:expectedInputArr2];
+    
+    NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInput2Data.length];
+    
+    PrefixSum_downsweep((uint8_t*)expectedInput1Data.bytes, (int)expectedInput1Data.length,
+                        (uint8_t*)expectedInput2Data.bytes, (int)expectedInput2Data.length,
+                        (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
+    
+    NSArray *cRenderedArr = [Util byteDataToArray:expectedRenderedData];
+    
+    XCTAssert([cRenderedArr isEqualToArray:expectedRenderedArr]);
+  }
 
   NSArray *input1Arr = [self arrayFrom8BitTexture:inputTexture1];
-  XCTAssert([input1Arr isEqualToArray:epectedInputArr1]);
+  XCTAssert([input1Arr isEqualToArray:expectedInputArr1]);
   
   NSArray *input2Arr = [self arrayFrom8BitTexture:inputTexture2];
-  XCTAssert([input2Arr isEqualToArray:epectedInputArr2]);
+  XCTAssert([input2Arr isEqualToArray:expectedInputArr2]);
   
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
 // Sweep up to 2x2
 
 - (void)testMetalSweep1x2to2x2 {
-  NSArray *epectedInputArr1 = @[
+  NSArray *expectedInputArr1 = @[
                                         @(0),         @(1)
                                 ];
   
-  NSArray *epectedInputArr2 = @[
+  NSArray *expectedInputArr2 = @[
                                 @(10), @(20), @(30), @(40)
                                 ];
   
-  NSArray *epectedRenderedArr = @[
+  NSArray *expectedRenderedArr = @[
                                   @(0), @(0+10), @(1), @(1+30)
                                   ];
 
@@ -1228,8 +1243,8 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture1 bytesArray:epectedInputArr1 mrc:mrc];
-  [self fill8BitTexture:inputTexture2 bytesArray:epectedInputArr2 mrc:mrc];
+  [self fill8BitTexture:inputTexture1 bytesArray:expectedInputArr1 mrc:mrc];
+  [self fill8BitTexture:inputTexture2 bytesArray:expectedInputArr2 mrc:mrc];
   
   // Get a metal command buffer
   
@@ -1263,28 +1278,43 @@
     [self dump8BitTexture:outputTexture label:@"outputTexture"];
   }
   
+  {
+    NSMutableData *expectedInput1Data = [Util bytesArrayToData:expectedInputArr1];
+    NSMutableData *expectedInput2Data = [Util bytesArrayToData:expectedInputArr2];
+    
+    NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInput2Data.length];
+    
+    PrefixSum_downsweep((uint8_t*)expectedInput1Data.bytes, (int)expectedInput1Data.length,
+                        (uint8_t*)expectedInput2Data.bytes, (int)expectedInput2Data.length,
+                        (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
+    
+    NSArray *cRenderedArr = [Util byteDataToArray:expectedRenderedData];
+    
+    XCTAssert([cRenderedArr isEqualToArray:expectedRenderedArr]);
+  }
+  
   NSArray *input1Arr = [self arrayFrom8BitTexture:inputTexture1];
-  XCTAssert([input1Arr isEqualToArray:epectedInputArr1]);
+  XCTAssert([input1Arr isEqualToArray:expectedInputArr1]);
   
   NSArray *input2Arr = [self arrayFrom8BitTexture:inputTexture2];
-  XCTAssert([input2Arr isEqualToArray:epectedInputArr2]);
+  XCTAssert([input2Arr isEqualToArray:expectedInputArr2]);
   
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
 // Sweep up to 2x4
 
 - (void)testMetalSweep2x2to2x4 {
-  NSArray *epectedInputArr1 = @[
+  NSArray *expectedInputArr1 = @[
                                         @(0),      @(0+10),         @(1),       @(1+30)
                                 ];
   
-  NSArray *epectedInputArr2 = @[
+  NSArray *expectedInputArr2 = @[
                                 @(10), @(20), @(30), @(40), @(50), @(60), @(70), @(80)
                                 ];
   
-  NSArray *epectedRenderedArr = @[
+  NSArray *expectedRenderedArr = @[
                                   @(0), @(10), @(10), @(40), @(1), @(51), @(31), @(31+70)
                                   ];
   
@@ -1319,8 +1349,8 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture1 bytesArray:epectedInputArr1 mrc:mrc];
-  [self fill8BitTexture:inputTexture2 bytesArray:epectedInputArr2 mrc:mrc];
+  [self fill8BitTexture:inputTexture1 bytesArray:expectedInputArr1 mrc:mrc];
+  [self fill8BitTexture:inputTexture2 bytesArray:expectedInputArr2 mrc:mrc];
   
   // Get a metal command buffer
   
@@ -1354,29 +1384,44 @@
     [self dump8BitTexture:outputTexture label:@"outputTexture"];
   }
   
+  {
+    NSMutableData *expectedInput1Data = [Util bytesArrayToData:expectedInputArr1];
+    NSMutableData *expectedInput2Data = [Util bytesArrayToData:expectedInputArr2];
+    
+    NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInput2Data.length];
+    
+    PrefixSum_downsweep((uint8_t*)expectedInput1Data.bytes, (int)expectedInput1Data.length,
+                        (uint8_t*)expectedInput2Data.bytes, (int)expectedInput2Data.length,
+                        (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
+    
+    NSArray *cRenderedArr = [Util byteDataToArray:expectedRenderedData];
+    
+    XCTAssert([cRenderedArr isEqualToArray:expectedRenderedArr]);
+  }
+  
   NSArray *input1Arr = [self arrayFrom8BitTexture:inputTexture1];
-  XCTAssert([input1Arr isEqualToArray:epectedInputArr1]);
+  XCTAssert([input1Arr isEqualToArray:expectedInputArr1]);
   
   NSArray *input2Arr = [self arrayFrom8BitTexture:inputTexture2];
-  XCTAssert([input2Arr isEqualToArray:epectedInputArr2]);
+  XCTAssert([input2Arr isEqualToArray:expectedInputArr2]);
   
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
 // Sweep up to 4x4
 
 - (void)testMetalSweep2x4to4x4 {
-  NSArray *epectedInputArr1 = @[
+  NSArray *expectedInputArr1 = @[
                                 @(0), @(1), @(2), @(3), @(4), @(5), @(6), @(7),
                                 ];
   
-  NSArray *epectedInputArr2 = @[
+  NSArray *expectedInputArr2 = @[
                                 @(10), @(20), @(30), @(40), @(50), @(60), @(70), @(80),
                                 @(90), @(100), @(110), @(120), @(130), @(140), @(150), @(160)
                                 ];
   
-  NSArray *epectedRenderedArr = @[
+  NSArray *expectedRenderedArr = @[
                                   // 0 -> (10,20)
                                   @(0), @(10),
                                   // 1 -> (30, 40)
@@ -1426,8 +1471,146 @@
   
   // fill inputTexture
   
-  [self fill8BitTexture:inputTexture1 bytesArray:epectedInputArr1 mrc:mrc];
-  [self fill8BitTexture:inputTexture2 bytesArray:epectedInputArr2 mrc:mrc];
+  [self fill8BitTexture:inputTexture1 bytesArray:expectedInputArr1 mrc:mrc];
+  [self fill8BitTexture:inputTexture2 bytesArray:expectedInputArr2 mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture1 label:@"inputTexture1"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture2 label:@"inputTexture2"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  {
+    NSMutableData *expectedInput1Data = [Util bytesArrayToData:expectedInputArr1];
+    NSMutableData *expectedInput2Data = [Util bytesArrayToData:expectedInputArr2];
+    
+    NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInput2Data.length];
+    
+    PrefixSum_downsweep((uint8_t*)expectedInput1Data.bytes, (int)expectedInput1Data.length,
+                        (uint8_t*)expectedInput2Data.bytes, (int)expectedInput2Data.length,
+                        (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
+    
+    NSArray *cRenderedArr = [Util byteDataToArray:expectedRenderedData];
+    
+    XCTAssert([cRenderedArr isEqualToArray:expectedRenderedArr]);
+  }
+  
+  NSArray *input1Arr = [self arrayFrom8BitTexture:inputTexture1];
+  XCTAssert([input1Arr isEqualToArray:expectedInputArr1]);
+  
+  NSArray *input2Arr = [self arrayFrom8BitTexture:inputTexture2];
+  XCTAssert([input2Arr isEqualToArray:expectedInputArr2]);
+  
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
+// Sweep 16x32 up to 32x32
+
+- (void)testMetalSweep16x32to32x32 {
+  NSMutableArray *expectedInput1Arr = [NSMutableArray array];
+  
+  {
+    int width = 16;
+    int height = 32;
+    
+    for ( int row = 0; row < height; row++ ) {
+      for ( int col = 0; col < width; col++ ) {
+        int offset = (row * width) + col;
+        uint8_t offsetAsByte = offset & 0xFF;
+        [expectedInput1Arr addObject:@(offsetAsByte)];
+      }
+    }
+  }
+
+  NSMutableArray *expectedInput2Arr = [NSMutableArray array];
+  
+  // Offset * 10 clamped to byte range
+  
+  {
+    int width = 32;
+    int height = 32;
+    
+    for ( int row = 0; row < height; row++ ) {
+      for ( int col = 0; col < width; col++ ) {
+        int offset = (row * width) + col;
+        int mult = offset * 10;
+        uint8_t offsetAsByte = mult & 0xFF;
+        [expectedInput2Arr addObject:@(offsetAsByte)];
+      }
+    }
+  }
+  
+  NSMutableData *expectedInput1Data = [Util bytesArrayToData:expectedInput1Arr];
+  NSMutableData *expectedInput2Data = [Util bytesArrayToData:expectedInput2Arr];
+  
+  NSMutableData *expectedRenderedData = [NSMutableData dataWithLength:expectedInput2Data.length];
+  
+  PrefixSum_downsweep((uint8_t*)expectedInput1Data.bytes, (int)expectedInput1Data.length,
+                      (uint8_t*)expectedInput2Data.bytes, (int)expectedInput2Data.length,
+                      (uint8_t*)expectedRenderedData.bytes, (int)expectedRenderedData.length);
+  
+  NSArray *expectedRenderedArr = [Util byteDataToArray:expectedRenderedData];
+    
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(32, 32);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture1.width == 16);
+  XCTAssert(inputTexture1.height == 32);
+  
+  XCTAssert(inputTexture2.width == 32);
+  XCTAssert(inputTexture2.height == 32);
+  
+  XCTAssert(outputTexture.width == 32);
+  XCTAssert(outputTexture.height == 32);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture1 bytesArray:expectedInput1Arr mrc:mrc];
+  [self fill8BitTexture:inputTexture2 bytesArray:expectedInput2Arr mrc:mrc];
   
   // Get a metal command buffer
   
@@ -1462,13 +1645,34 @@
   }
   
   NSArray *input1Arr = [self arrayFrom8BitTexture:inputTexture1];
-  XCTAssert([input1Arr isEqualToArray:epectedInputArr1]);
+  XCTAssert([input1Arr isEqualToArray:expectedInput1Arr]);
   
   NSArray *input2Arr = [self arrayFrom8BitTexture:inputTexture2];
-  XCTAssert([input2Arr isEqualToArray:epectedInputArr2]);
+  XCTAssert([input2Arr isEqualToArray:expectedInput2Arr]);
   
   NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
-  XCTAssert([renderedArr isEqualToArray:epectedRenderedArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+  
+  {
+    int width = 32;
+    int height = 32;
+    
+    for ( int row = 0; row < height; row++ ) {
+      for ( int col = 0; col < width; col++ ) {
+        int offset = (row * width) + col;
+        
+        NSNumber *expectedNum = expectedRenderedArr[offset];
+        NSNumber *renderedNum = renderedArr[offset];
+        
+        BOOL same = [renderedNum isEqualToNumber:expectedNum];
+        
+        if (!same) {
+          XCTAssert(FALSE, @"!same %d != %d at offset %d", [renderedNum unsignedIntValue], [expectedNum unsignedIntValue], offset);
+        }
+      }
+    }
+  }
+
 }
 
 @end
