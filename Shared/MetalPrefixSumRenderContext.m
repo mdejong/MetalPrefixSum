@@ -38,9 +38,13 @@
   NSString *sumReduceShader = @"fragmentShaderPrefixSumReduce";
   NSString *sumReduceShaderA7 = @"fragmentShaderPrefixSumReduceA7";
   
+  NSString *sumSweepShader = @"fragmentShaderPrefixSumDownSweep";
+  NSString *sumSweepShaderA7 = @"fragmentShaderPrefixSumDownSweepA7";
+  
   if (gpuFamily == 1) {
     // A7
     sumReduceShader = sumReduceShaderA7;
+    sumSweepShader = sumSweepShaderA7;
   }
   
   self.reducePipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
@@ -52,8 +56,6 @@
   NSAssert(self.reducePipelineState, @"reducePipelineState");
 
   // FIXME: A7 support
-  
-  NSString *sumSweepShader = @"fragmentShaderPrefixSumDownSweep";
   
   self.sweepPipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
                                  pipelineLabel:@"PrefixSumSweep Pipeline"

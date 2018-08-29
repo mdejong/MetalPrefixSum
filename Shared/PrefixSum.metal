@@ -326,66 +326,47 @@ fragmentShaderPrefixSumDownSweep(RasterizerData in [[stage_in]],
   // Reading from t2 is slightly more complex since a texture read is only
   // needed when processing a pixel with an odd X value.
   
-  //int gidOffset = (gid.y * renderSize.x) + gid.x;
   int gidOffsetMinusOne = (t2Offset - 1);
   ushort2 t2Coords = offset_to_coords(inTexture2.get_width(), gidOffsetMinusOne);
   
   uint8_t t2Byte = ((t2Offset & 0x1) == 0) ? 0 : uint8_from_half(inTexture2.read(t2Coords).x);
   
-//  ushort2 b2Coords = b1Coords;
-//  b2Coords.x += 1;
-  
-  // width of render texture
-  //return uint8_to_half(renderSize.x);
-  // height of render texture
-  //return uint8_to_half(renderSize.y);
-  
-  // output X coordinate
-  //return uint8_to_half(gid.x);
-  // output Y coordinate
-  //return uint8_to_half(gid.y);
-  
-//  ushort isOdd;
-  
-  // gid1 is the read coordinates in the 1/2 height texture
-  //ushort2 gid1 = gid;
-  //isOdd = (gid.x & 0x1);
-  //gid1.x -= isOdd;
-  
-  //isOdd = (gid.y & 0x1);
-  //gid1.x += isOdd;
-  
-  //gid1.y /= 2;
-  
-  // Read from T1 in either case
-  //uint8_t bT1 = uint8_from_half(inTexture1.read(gid1).x);
-  
-  // input 1 X coordinate
-  //return uint8_to_half(gid1.x);
-  // input 1 Y coordinate
-  //return uint8_to_half(gid1.y);
-  // input 1
-  //return uint8_to_half(bT1);
-  
-  // Read from T2 if gidOffset is odd (every other value)
-  
-  // gid2 is (offset - 1) as coords and the texture is read only when offset is odd.
-  //int gidOffset = (gid.y * renderSize.x) + gid.x;
-  //int gidOffsetMinusOne = (gidOffset - 1);
-  //ushort2 gid2 = ushort2(gidOffsetMinusOne % renderSize.x, gidOffsetMinusOne / renderSize.x);
-  
-  // When gid offset is odd, read from inTexture2
-  
-  //uint8_t bT2 = ((gidOffset & 0x1) != 0) ? uint8_from_half(inTexture2.read(gid2).x) : 0;
-  //uint8_t bT2 = uint8_from_half(inTexture2.read(gid2).x);
-  
-  // input 2 X coordinate
-  //return uint8_to_half(gid2.x);
-  // input 2 Y coordinate
-  //return uint8_to_half(gid2.y);
-  // input 2
-  //return uint8_to_half(bT2);
-  
   return uint8_to_half(t1Byte + t2Byte);
 }
 
+// This version avoids a bug in A7 compilation having to do with half float values
+
+fragment half
+fragmentShaderPrefixSumDownSweepA7(RasterizerData in [[stage_in]],
+                                 texture2d<half, access::read> inTexture1 [[ texture(0) ]],
+                                 texture2d<half, access::read> inTexture2 [[ texture(1) ]],
+                                 constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
+{
+  const ushort2 renderSize = ushort2(inTexture2.get_width(), inTexture2.get_height());
+  ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
+  
+  // gidOffset is the flat offset of the render pixel in t2
+  uint t2Offset = coords_to_offset(renderSize.x, gid);
+  
+  // t1Offset is the offset in t1 that is read from unconditionally
+  uint t1Offset = t2Offset / 2;
+  
+  ushort2 t1Coords = offset_to_coords(inTexture1.get_width(), t1Offset);
+  uint8_t t1Byte = uint8_from_half(inTexture1.read(t1Coords).x);
+  
+  // Reading from t2 is slightly more complex since a texture read is only
+  // needed when processing a pixel with an odd X value.
+  
+  int gidOffsetMinusOne = (t2Offset - 1);
+  ushort2 t2Coords = offset_to_coords(inTexture2.get_width(), gidOffsetMinusOne);
+  
+  uint8_t t2Byte = ((t2Offset & 0x1) == 0) ? 0 : uint8_from_half(inTexture2.read(t2Coords).x);
+  
+  // This logic does not work properly on A7
+  //return uint8_to_half(t1Byte + t2Byte);
+  
+  // This does work properly on A7, note the
+  // literal here is a float value not a half float.
+  uint8_t sum = t1Byte + t2Byte;
+  return half(ushort(sum) / 255.0);
+}
