@@ -1755,4 +1755,217 @@
   XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
+- (void)testMetalFullPrefixSum2x2FirstNonZero {
+  NSArray *expectedInputArr = @[
+                                @(1), @(2),
+                                @(3), @(4)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(0), @(1),
+                                   @(3), @(6)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(2, 2);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture.width == 2);
+  XCTAssert(inputTexture.height == 2);
+  
+  XCTAssert(outputTexture.width == 2);
+  XCTAssert(outputTexture.height == 2);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTextureD1"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTextureD1"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
+- (void)testMetalFullPrefixSum4x4 {
+  NSMutableArray *expectedInputArr = [NSMutableArray array];
+  NSMutableArray *expectedRenderedArr = [NSMutableArray array];
+  
+  {
+    int width = 4;
+    int height = 4;
+    
+    uint8_t byteSum = 0;
+    
+    for ( int row = 0; row < height; row++ ) {
+      for ( int col = 0; col < width; col++ ) {
+        int offset = (row * width) + col;
+        uint8_t offsetAsByte = (offset + 1) & 0xFF;
+        [expectedInputArr addObject:@(offsetAsByte)];
+        
+        [expectedRenderedArr addObject:@(byteSum)];
+        byteSum += offsetAsByte;
+      }
+    }
+  }
+
+// INPUT
+
+//  1   2   3   4
+//  5   6   7   8
+//  9  10  11  12
+//  13  14  15  16
+
+// EXPECTED OUTPUT:
+  
+//  0   1   3   6
+//  11  16  22  29
+//  15  24  34  45
+//  42  55  69  84
+  
+//  0 0+1 0+1+2 0+1+2+3       =  0  1  3  6
+//  10 10+5 10+5+6 10+5+6+7   = 10 15 21 28
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(4, 4);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture.width == 4);
+  XCTAssert(inputTexture.height == 4);
+  
+  XCTAssert(outputTexture.width == 4);
+  XCTAssert(outputTexture.height == 4);
+  
+  XCTAssert(mpsrf.reduceTextures.count == 3);
+  XCTAssert(mpsrf.sweepTextures.count == 3);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  // Print each reduce output texture
+  
+  {
+    int level = 1;
+    
+    for ( id<MTLTexture> outputTexture in mpsrf.reduceTextures ) {
+      if (dump) {
+        NSString *levelStr = [NSString stringWithFormat:@"reduceTextureL%d", level];
+        [self dump8BitTexture:outputTexture label:levelStr];
+      }
+      
+      level += 1;
+    }
+  }
+  
+  {
+    int level = 2;
+    
+    for ( id<MTLTexture> outputTexture in mpsrf.sweepTextures ) {
+      if (dump) {
+        NSString *levelStr = [NSString stringWithFormat:@"sweepTextureL%d", level];
+        [self dump8BitTexture:outputTexture label:levelStr];
+      }
+      
+      level -= 1;
+    }
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
 @end

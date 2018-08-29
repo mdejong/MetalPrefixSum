@@ -86,7 +86,7 @@
                   renderSize:(CGSize)renderSize
                  renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
 {
-  const bool debug = true;
+  const BOOL debug = TRUE;
   
   unsigned int width = renderSize.width;
   unsigned int height = renderSize.height;
@@ -103,6 +103,10 @@
     id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
     renderFrame.inputBlockOrderTexture = txt;
+    
+    if (debug) {
+      NSLog(@"input : texture %3d x %3d", (int)txt.width, (int)txt.height);
+    }
   }
 
   // Texture that holds block order input bytes
@@ -437,6 +441,8 @@
            commandBuffer:(id<MTLCommandBuffer>)commandBuffer
              renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
 {
+  const BOOL debug = TRUE;
+  
   // Determine how to recurse based on configuration in renderFrame
   
 #if defined(DEBUG)
@@ -445,11 +451,21 @@
   
   int maxStep = (int) renderFrame.reduceTextures.count;
   
+  if (debug) {
+    NSLog(@"num reduce/sweep steps %3d", maxStep);
+  }
+  
   {
     id<MTLTexture> inputTexture = renderFrame.inputBlockOrderTexture;
     
     for (int i = 0; i < maxStep; i++) {
       id<MTLTexture> outputTexture = renderFrame.reduceTextures[i];
+      
+      if (debug) {
+        NSLog(@"reduce step   : %d", i+1);
+        NSLog(@"inputTexture  : %4d x %4d", (int)inputTexture.width, (int)inputTexture.height);
+        NSLog(@"outputTexture : %4d x %4d", (int)outputTexture.width, (int)outputTexture.height);
+      }
       
       [self renderPrefixSumReduce:mrc
                     commandBuffer:commandBuffer
@@ -465,11 +481,21 @@
   // Once all reduce operations have been completed the down sweep can be processed
   
   {
-    id<MTLTexture> inputTexture1 = renderFrame.zeroTexture;
-    id<MTLTexture> inputTexture2 = renderFrame.reduceTextures[maxStep-1];
+    int i = maxStep - 1;
     
-    for (int i = maxStep - 1; i >= 0; i--) {
+    id<MTLTexture> inputTexture1 = renderFrame.zeroTexture;
+    id<MTLTexture> inputTexture2;
+    
+    for ( ; i >= 0; i--) {
       id<MTLTexture> outputTexture = renderFrame.sweepTextures[i];
+      inputTexture2 = renderFrame.reduceTextures[i];
+      
+      if (debug) {
+        NSLog(@"sweep         : step %d", i+1);
+        NSLog(@"inputTexture1 : %4d x %4d", (int)inputTexture1.width, (int)inputTexture1.height);
+        NSLog(@"inputTexture2 : %4d x %4d", (int)inputTexture2.width, (int)inputTexture2.height);
+        NSLog(@"outputTexture : %4d x %4d", (int)outputTexture.width, (int)outputTexture.height);
+      }
       
       [self renderPrefixSumSweep:mrc
                    commandBuffer:commandBuffer
@@ -480,13 +506,19 @@
                            level:i+1];
 
       inputTexture1 = outputTexture;
-      inputTexture2 = renderFrame.reduceTextures[i];
     }
     
     // A final down sweep adds values to the original input
     
     id<MTLTexture> outputTexture = renderFrame.outputBlockOrderTexture;
     inputTexture2 = renderFrame.inputBlockOrderTexture;
+    
+    if (debug) {
+      NSLog(@"final sweep");
+      NSLog(@"inputTexture1 : %4d x %4d", (int)inputTexture1.width, (int)inputTexture1.height);
+      NSLog(@"inputTexture2 : %4d x %4d", (int)inputTexture2.width, (int)inputTexture2.height);
+      NSLog(@"outputTexture : %4d x %4d", (int)outputTexture.width, (int)outputTexture.height);
+    }
     
     [self renderPrefixSumSweep:mrc
                  commandBuffer:commandBuffer
