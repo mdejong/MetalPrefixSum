@@ -202,11 +202,11 @@
   BOOL dump = TRUE;
   
   if (dump) {
-  [self dump8BitTexture:inputTexture label:@"inputTextureD1"];
+  [self dump8BitTexture:inputTexture label:@"inputTexture"];
   }
   
   if (dump) {
-  [self dump8BitTexture:outputTexture label:@"outputTextureD1"];
+  [self dump8BitTexture:outputTexture label:@"outputTexture"];
   }
 
   NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
@@ -369,7 +369,6 @@
   XCTAssert([inputArr isEqualToArray:expectedInputArr]);
   XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
-
 
 - (void)testMetalReduce2x2To1x2 {
   NSArray *expectedInputArr = @[
@@ -1911,6 +1910,129 @@
   XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
+
+// Is there a reduce problem when doing 2 steps of a render operation
+// from 4x4 to 2x4 to 2x2 ?
+
+- (void)testMetalReduce4x4To2x2TwoRenderPasses {
+  NSArray *expectedInputArr = @[
+                                @1, @2, @3, @4,
+                                @5, @6, @7, @8,
+                                @9, @10, @11, @12,
+                                @13, @14, @15, @16
+                                ];
+  
+  NSArray *expectedRenderedStep1Arr = @[
+                                        @3, @7,
+                                        @11, @15,
+                                        @19, @23,
+                                        @27, @32
+                                        ];
+  
+  NSArray *expectedRenderedStep2Arr = @[
+                                        @10, @26,
+                                        @42, @58
+                                        ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(4, 4);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  
+  id<MTLTexture> outputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  XCTAssert(outputTexture1.width == 2);
+  XCTAssert(outputTexture1.height == 4);
+  
+  id<MTLTexture> outputTexture2 = (id<MTLTexture>) mpsrf.reduceTextures[1];
+  XCTAssert(outputTexture2.width == 2);
+  XCTAssert(outputTexture2.height == 2);
+
+  XCTAssert(outputTexture1 != outputTexture2);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+
+  // fill outputTexture1 and outputTexture2 for debug purposes
+  
+  {
+    NSArray *arr = @[
+                                          @(0xFF), @(0xFF),
+                                          @(0xFF), @(0xFF),
+                                          @(0xFF), @(0xFF),
+                                          @(0xFF), @(0xFF)
+                                          ];
+    
+    [self fill8BitTexture:outputTexture1 bytesArray:arr mrc:mrc];
+  }
+  
+  {
+    NSArray *arr = @[
+                     @(0xFF), @(0xFF),
+                     @(0xFF), @(0xFF)
+                     ];
+    
+    [self fill8BitTexture:outputTexture2 bytesArray:arr mrc:mrc];
+  }
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture1 level:1];
+  
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:outputTexture1 outputTexture:outputTexture2 level:2];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture1 label:@"outputTextureL1"];
+  }
+
+  if (dump) {
+    [self dump8BitTexture:outputTexture2 label:@"outputTextureL2"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *rendered1Arr = [self arrayFrom8BitTexture:outputTexture1];
+  NSArray *rendered2Arr = [self arrayFrom8BitTexture:outputTexture2];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([rendered1Arr isEqualToArray:expectedRenderedStep1Arr]);
+  XCTAssert([rendered2Arr isEqualToArray:expectedRenderedStep2Arr]);
+}
+
 - (void)testMetalFullPrefixSum4x4 {
   NSMutableArray *expectedInputArr = [NSMutableArray array];
   NSArray *expectedRenderedArr;
@@ -2054,3 +2176,4 @@
 }
 
 @end
+
