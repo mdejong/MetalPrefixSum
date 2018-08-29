@@ -268,6 +268,8 @@
 
 // Prefix sum render operation, this executes a single reduce step
 
+// FIXME: no reason to pass render frame to these methods since they accept textures directly
+
 - (void) renderPrefixSumReduce:(MetalRenderContext*)mrc
                  commandBuffer:(id<MTLCommandBuffer>)commandBuffer
                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
@@ -332,7 +334,7 @@
                             offset:0
                            atIndex:AAPLVertexInputIndexVertices];
     
-    [renderEncoder setFragmentTexture:renderFrame.inputBlockOrderTexture atIndex:0];
+    [renderEncoder setFragmentTexture:inputTexture atIndex:0];
     
     [renderEncoder setFragmentBuffer:renderFrame.renderTargetDimensionsAndBlockDimensionsUniform
                               offset:0

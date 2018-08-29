@@ -370,6 +370,89 @@
   XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
+// 4x4 -> 2x4 -> 2x2 but only do the second render to 2x2
+
+- (void)testMetalReduce2x4To2x2Ident2 {
+  // Starting with ident input at 4x4 [1, 2, 3, 4 ..., 16]
+  
+  NSArray *expectedInputArr = @[
+                                @(3), @(7),
+                                @(11), @(15),
+                                @(19), @(23),
+                                @(27), @(31)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(10), @(26),
+                                   @(42), @(58)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(4, 4);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[1];
+  
+  XCTAssert(inputTexture.width == 2);
+  XCTAssert(inputTexture.height == 4);
+  
+  XCTAssert(outputTexture.width == 2);
+  XCTAssert(outputTexture.height == 2);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Reduce second step
+  
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:2];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
 - (void)testMetalReduce2x2To1x2 {
   NSArray *expectedInputArr = @[
                                @(1+5),   @(9+13),
@@ -1926,7 +2009,7 @@
                                         @3, @7,
                                         @11, @15,
                                         @19, @23,
-                                        @27, @32
+                                        @27, @31
                                         ];
   
   NSArray *expectedRenderedStep2Arr = @[
@@ -1975,7 +2058,7 @@
                                           @(0xFF), @(0xFF),
                                           @(0xFF), @(0xFF)
                                           ];
-    
+
     [self fill8BitTexture:outputTexture1 bytesArray:arr mrc:mrc];
   }
   
