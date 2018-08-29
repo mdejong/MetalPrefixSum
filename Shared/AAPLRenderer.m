@@ -977,8 +977,11 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   // Prefix sum setup and render steps
   
   MetalPrefixSumRenderFrame *mpsRenderFrame = self.mpsRenderFrame;
+
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.reduceTextures[0];
   
-  [self.mpsrc renderPrefixSumReduce:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame];
+  [self.mpsrc renderPrefixSumReduce:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame inputTexture:inputTexture outputTexture:outputTexture];
   
   // --------------------------------------------------------------------------
   

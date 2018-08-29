@@ -191,7 +191,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -267,7 +267,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -341,7 +341,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -464,7 +464,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -601,7 +601,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -715,7 +715,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -828,7 +828,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -941,7 +941,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1054,7 +1054,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
   
   // Wait for commands to be rendered
   [commandBuffer commit];

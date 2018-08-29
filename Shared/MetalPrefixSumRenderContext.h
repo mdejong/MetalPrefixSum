@@ -43,7 +43,9 @@
 
 - (void) renderPrefixSumReduce:(MetalRenderContext*)mrc
                  commandBuffer:(id<MTLCommandBuffer>)commandBuffer
-                   renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
+                   renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+                  inputTexture:(id<MTLTexture>)inputTexture
+                 outputTexture:(id<MTLTexture>)outputTexture;
 
 - (void) renderPrefixSumSweep:(MetalRenderContext*)mrc
                 commandBuffer:(id<MTLCommandBuffer>)commandBuffer

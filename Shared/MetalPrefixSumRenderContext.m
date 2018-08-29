@@ -263,6 +263,9 @@
 - (void) renderPrefixSumReduce:(MetalRenderContext*)mrc
                  commandBuffer:(id<MTLCommandBuffer>)commandBuffer
                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+                  inputTexture:(id<MTLTexture>)inputTexture
+                 outputTexture:(id<MTLTexture>)outputTexture
+
 {
 #if defined(DEBUG)
   assert(mrc);
@@ -274,10 +277,6 @@
   
   if (renderPassDescriptor != nil)
   {
-    // Reduce depth=1 output texture
-    id<MTLTexture> inputTexture = renderFrame.inputBlockOrderTexture;
-    id<MTLTexture> outputTexture = (id<MTLTexture>) renderFrame.reduceTextures[0];
-    
 #if defined(DEBUG)
     // Output of a square reduce is 1/2 the width
     // Output of a rect reduce is 1/2 the height
