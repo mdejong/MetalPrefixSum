@@ -105,7 +105,7 @@
     renderFrame.inputBlockOrderTexture = txt;
     
     if (debug) {
-      NSLog(@"input : texture %3d x %3d", (int)txt.width, (int)txt.height);
+      NSLog(@"input       : texture %3d x %3d", (int)txt.width, (int)txt.height);
     }
   }
 
@@ -117,7 +117,7 @@
     renderFrame.outputBlockOrderTexture = txt;
     
     if (debug) {
-      NSLog(@"output : texture %3d x %3d", (int)txt.width, (int)txt.height);
+      NSLog(@"output      : texture %3d x %3d", (int)txt.width, (int)txt.height);
     }
   }
   
