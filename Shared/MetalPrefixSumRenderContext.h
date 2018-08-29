@@ -45,14 +45,18 @@
                  commandBuffer:(id<MTLCommandBuffer>)commandBuffer
                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
                   inputTexture:(id<MTLTexture>)inputTexture
-                 outputTexture:(id<MTLTexture>)outputTexture;
+                 outputTexture:(id<MTLTexture>)outputTexture
+                         level:(int)level;
+
+// Prefix sum sweep, this executes a single sweep step
 
 - (void) renderPrefixSumSweep:(MetalRenderContext*)mrc
                 commandBuffer:(id<MTLCommandBuffer>)commandBuffer
                   renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
                 inputTexture1:(id<MTLTexture>)inputTexture1
                 inputTexture2:(id<MTLTexture>)inputTexture2
-                outputTexture:(id<MTLTexture>)outputTexture;
+                outputTexture:(id<MTLTexture>)outputTexture
+                        level:(int)level;
 
 #if defined(DEBUG)
 

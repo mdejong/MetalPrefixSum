@@ -981,7 +981,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.reduceTextures[0];
   
-  [self.mpsrc renderPrefixSumReduce:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame inputTexture:inputTexture outputTexture:outputTexture];
+  [self.mpsrc renderPrefixSumReduce:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // --------------------------------------------------------------------------
   

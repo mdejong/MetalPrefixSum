@@ -191,7 +191,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -267,7 +267,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -341,7 +341,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -464,7 +464,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -601,7 +601,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -715,7 +715,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -828,7 +828,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -941,7 +941,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1054,7 +1054,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1156,7 +1156,7 @@
   
   commandBuffer.label = @"XCTestRenderCommandBuffer";
     
-  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture];
+  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1256,7 +1256,7 @@
   
   commandBuffer.label = @"XCTestRenderCommandBuffer";
   
-  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture];
+  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1362,7 +1362,7 @@
   
   commandBuffer.label = @"XCTestRenderCommandBuffer";
   
-  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture];
+  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1484,7 +1484,7 @@
   
   commandBuffer.label = @"XCTestRenderCommandBuffer";
   
-  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture];
+  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1622,7 +1622,7 @@
   
   commandBuffer.label = @"XCTestRenderCommandBuffer";
   
-  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture];
+  [mpsrc renderPrefixSumSweep:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture1:inputTexture1 inputTexture2:inputTexture2 outputTexture:outputTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
