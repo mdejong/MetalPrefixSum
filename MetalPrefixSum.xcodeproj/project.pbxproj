@@ -74,6 +74,9 @@
 		3C1C56B31FE4433F0024A55E /* ImageIpadSize.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */; };
 		3C4DC8FB1FDB495F00AABD25 /* ImageHuge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */; };
 		3C56AF9B1FEC70F000005C41 /* BigBridge.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C56AF9A1FEC70F000005C41 /* BigBridge.png */; };
+		3C7440B02137656900629471 /* MetalPrefixSumRenderContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529302133379C00A41138 /* MetalPrefixSumRenderContext.m */; };
+		3C7440B12137656C00629471 /* MetalPrefixSumRenderFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529292133318900A41138 /* MetalPrefixSumRenderFrame.m */; };
+		3C7440B22137657000629471 /* MetalRenderContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0529262133318700A41138 /* MetalRenderContext.m */; };
 		3CB220AA1F7E03FF0023B470 /* Image.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CB220A81F7E03FF0023B470 /* Image.png */; };
 		3CBED75020CAFD0F00A64451 /* elias_encode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CBED74E20CAFD0C00A64451 /* elias_encode.cpp */; };
 		3CDE879F1FBDFE1300EDB3FC /* Eliasg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CDE879E1FBDFE1300EDB3FC /* Eliasg.mm */; };
@@ -707,12 +710,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C7440B22137657000629471 /* MetalRenderContext.m in Sources */,
 				3C0604692133B14E0035E5EC /* AAPLShaders.metal in Sources */,
 				3C06046B2133B2AE0035E5EC /* MetalUtils.metal in Sources */,
 				3C05295D213376E000A41138 /* EmptyAppTests.m in Sources */,
 				3C0604672133B0B30035E5EC /* PassThroughShader.metal in Sources */,
 				3C06046D2133B2B60035E5EC /* PrefixSum.metal in Sources */,
 				3C0604742134A79B0035E5EC /* Util.m in Sources */,
+				3C7440B02137656900629471 /* MetalPrefixSumRenderContext.m in Sources */,
+				3C7440B12137656C00629471 /* MetalPrefixSumRenderFrame.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
