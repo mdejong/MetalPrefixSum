@@ -267,6 +267,12 @@
                  outputTexture:(id<MTLTexture>)outputTexture
                          level:(int)level
 {
+  const BOOL debug = TRUE;
+  
+  if (debug) {
+    NSLog(@"renderPrefixSumReduce inputTexture: %4d x %4d and outputTexture: %4d x %4d at level %d", (int)inputTexture.width, (int)inputTexture.height, (int)outputTexture.width, (int)outputTexture.height, level);
+  }
+  
 #if defined(DEBUG)
   assert(mrc);
   assert(commandBuffer);
@@ -345,6 +351,12 @@
                 outputTexture:(id<MTLTexture>)outputTexture
                         level:(int)level
 {
+  const BOOL debug = TRUE;
+  
+  if (debug) {
+    NSLog(@"renderPrefixSumSweep inputTexture1: %4d x %4d and inputTexture2: %4d x %4d and outputTexture: %4d x %4d at level %d", (int)inputTexture1.width, (int)inputTexture1.height, (int)inputTexture2.width, (int)inputTexture2.height, (int)outputTexture.width, (int)outputTexture.height, level);
+  }
+  
 #if defined(DEBUG)
   assert(mrc);
   assert(commandBuffer);
@@ -415,6 +427,77 @@
     
     [renderEncoder endEncoding];
   }
+}
+
+// Process input texture data written in block by block order from
+// the frame.inputBlockOrderTexture, generate parallel prefix sum
+// and then write the result frame.outputBlockOrderTexture
+
+- (void) renderPrefixSum:(MetalRenderContext*)mrc
+           commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+             renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+{
+  // Determine how to recurse based on configuration in renderFrame
+  
+#if defined(DEBUG)
+  assert(renderFrame.reduceTextures.count == renderFrame.sweepTextures.count);
+#endif // DEBUG
+  
+  int maxStep = (int) renderFrame.reduceTextures.count;
+  
+  {
+    id<MTLTexture> inputTexture = renderFrame.inputBlockOrderTexture;
+    
+    for (int i = 0; i < maxStep; i++) {
+      id<MTLTexture> outputTexture = renderFrame.reduceTextures[i];
+      
+      [self renderPrefixSumReduce:mrc
+                    commandBuffer:commandBuffer
+                      renderFrame:renderFrame
+                     inputTexture:inputTexture
+                    outputTexture:outputTexture
+                            level:i+1];
+      
+      inputTexture = outputTexture;
+    }
+  }
+
+  // Once all reduce operations have been completed the down sweep can be processed
+  
+  {
+    id<MTLTexture> inputTexture1 = renderFrame.zeroTexture;
+    id<MTLTexture> inputTexture2 = renderFrame.reduceTextures[maxStep-1];
+    
+    for (int i = maxStep - 1; i >= 0; i--) {
+      id<MTLTexture> outputTexture = renderFrame.sweepTextures[i];
+      
+      [self renderPrefixSumSweep:mrc
+                   commandBuffer:commandBuffer
+                     renderFrame:renderFrame
+                   inputTexture1:inputTexture1
+                   inputTexture2:inputTexture2
+                   outputTexture:outputTexture
+                           level:i+1];
+
+      inputTexture1 = outputTexture;
+      inputTexture2 = renderFrame.reduceTextures[i];
+    }
+    
+    // A final down sweep adds values to the original input
+    
+    id<MTLTexture> outputTexture = renderFrame.outputBlockOrderTexture;
+    inputTexture2 = renderFrame.inputBlockOrderTexture;
+    
+    [self renderPrefixSumSweep:mrc
+                 commandBuffer:commandBuffer
+                   renderFrame:renderFrame
+                 inputTexture1:inputTexture1
+                 inputTexture2:inputTexture2
+                 outputTexture:outputTexture
+                         level:0];
+  }
+  
+  return;
 }
 
 @end

@@ -1675,4 +1675,84 @@
 
 }
 
+
+// ------ reduce and then sweep together
+
+- (void)testMetalFullPrefixSum2x2 {
+  NSArray *expectedInputArr = @[
+                                @(0), @(1),
+                                @(2), @(3)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(0), @(0),
+                                   @(1), @(3)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(2, 2);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+
+  XCTAssert(inputTexture.width == 2);
+  XCTAssert(inputTexture.height == 2);
+  
+  XCTAssert(outputTexture.width == 2);
+  XCTAssert(outputTexture.height == 2);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTextureD1"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTextureD1"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
 @end

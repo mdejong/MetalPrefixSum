@@ -58,6 +58,14 @@
                 outputTexture:(id<MTLTexture>)outputTexture
                         level:(int)level;
 
+// Process input texture data written in block by block order from
+// the frame.inputBlockOrderTexture, generate parallel prefix sum
+// and then write the result frame.outputBlockOrderTexture
+
+- (void) renderPrefixSum:(MetalRenderContext*)mrc
+           commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+             renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
+
 #if defined(DEBUG)
 
 // Implements debug render operation where (X,Y) values are written to a buffer
