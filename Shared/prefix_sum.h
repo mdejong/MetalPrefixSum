@@ -110,4 +110,28 @@ void PrefixSum_downsweep(uint8_t *inBytes1, int inNumBytes1,
   }
 }
 
+// Simple prefix sum impl for unsigned byte values
+
+static inline
+void PrefixSum_simple(uint8_t *inBytes, int inNumBytes,
+                      uint8_t *outBytes, int outNumBytes)
+{
+#if defined(DEBUG)
+  assert(inNumBytes == outNumBytes);
+#endif // DEBUG
+  
+  uint8_t byteSum = 0;
+  
+  for ( int offset = 0; offset < outNumBytes; offset++ ) {
+#if defined(DEBUG)
+    assert(offset < inNumBytes);
+    assert(offset < outNumBytes);
+#endif // DEBUG
+    
+    uint8_t inByte = inBytes[offset];
+    outBytes[offset] = byteSum;
+    byteSum += inByte;
+  }
+}
+
 #endif // _prefix_sum_h

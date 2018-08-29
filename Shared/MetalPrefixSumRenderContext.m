@@ -115,6 +115,10 @@
     id<MTLTexture> txt = [mrc make8bitTexture:CGSizeMake(width, height) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
     renderFrame.outputBlockOrderTexture = txt;
+    
+    if (debug) {
+      NSLog(@"output : texture %3d x %3d", (int)txt.width, (int)txt.height);
+    }
   }
   
   // FIXME: pass int recursion depth into reduction and sweep shader (stack on N of these)
@@ -462,7 +466,7 @@
       id<MTLTexture> outputTexture = renderFrame.reduceTextures[i];
       
       if (debug) {
-        NSLog(@"reduce step   : %d", i+1);
+        NSLog(@"reduce step   : %d uses reduceTextures[%2d] and reduceTextures[%2d]", i+1, i-1, i);        
         NSLog(@"inputTexture  : %4d x %4d", (int)inputTexture.width, (int)inputTexture.height);
         NSLog(@"outputTexture : %4d x %4d", (int)outputTexture.width, (int)outputTexture.height);
       }
@@ -487,11 +491,15 @@
     id<MTLTexture> inputTexture2;
     
     for ( ; i >= 0; i--) {
-      id<MTLTexture> outputTexture = renderFrame.sweepTextures[i];
+      // inputTexture1 is zeros or output of previous sweep
+      
+      // inputTexture2 is the reduce output for this level
       inputTexture2 = renderFrame.reduceTextures[i];
       
+      id<MTLTexture> outputTexture = renderFrame.sweepTextures[i];
+      
       if (debug) {
-        NSLog(@"sweep         : step %d", i+1);
+        NSLog(@"sweep         : step %2d uses reduceTextures[%2d] sweepTextures[%2d]", i+1, i, i);
         NSLog(@"inputTexture1 : %4d x %4d", (int)inputTexture1.width, (int)inputTexture1.height);
         NSLog(@"inputTexture2 : %4d x %4d", (int)inputTexture2.width, (int)inputTexture2.height);
         NSLog(@"outputTexture : %4d x %4d", (int)outputTexture.width, (int)outputTexture.height);
