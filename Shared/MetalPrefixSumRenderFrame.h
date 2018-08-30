@@ -24,7 +24,7 @@
 @property (nonatomic, assign) int width;
 @property (nonatomic, assign) int height;
 
-@property (nonatomic, assign) int blockDim;
+@property (nonatomic, assign) NSUInteger blockDim;
 
 // The original input image order in image order
 

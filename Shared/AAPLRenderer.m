@@ -885,7 +885,7 @@ const static unsigned int blockDim = 8;
   
   MetalPrefixSumRenderFrame *mpsRenderFrame = self.mpsRenderFrame;
   
-  [self.mpsrc renderPrefixSum:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame];
+  [self.mpsrc renderPrefixSum:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame isExclusive:FALSE];
   
   {
     // Copy prefix sum delta input bytes into block order texture

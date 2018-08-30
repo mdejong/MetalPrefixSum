@@ -89,10 +89,18 @@
   unsigned int width = renderSize.width;
   unsigned int height = renderSize.height;
 
-  const int blockDim = 32;
+  renderFrame.width = 0;
+  renderFrame.height = 0;
   
-  renderFrame.width = width;
-  renderFrame.height = height;
+  // blockDim is known to be a POT, so it can be treated as
+  // always being a POT in shader logic.
+  
+  unsigned int blockDim = width * height;
+  
+  assert(blockDim > 1);
+  BOOL isPOT = (blockDim & (blockDim - 1)) == 0;
+  assert(isPOT);
+  
   renderFrame.blockDim = blockDim;
   
   // Texture that holds block order input bytes
@@ -194,10 +202,10 @@
   
   {
     RenderTargetDimensionsAndBlockDimensionsUniform *ptr = renderFrame.renderTargetDimensionsAndBlockDimensionsUniform.contents;
-    ptr->width = width;
-    ptr->height = height;
-    ptr->blockWidth = width;
-    ptr->blockHeight = height;
+    ptr->width = renderFrame.width;
+    ptr->height = renderFrame.height;
+    ptr->blockWidth = renderFrame.blockDim;
+    ptr->blockHeight = renderFrame.blockDim;
   }
   
   return;
