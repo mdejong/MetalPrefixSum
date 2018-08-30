@@ -110,10 +110,10 @@ void PrefixSum_downsweep(uint8_t *inBytes1, int inNumBytes1,
   }
 }
 
-// Simple prefix sum impl for unsigned byte values
+// Simple serial exclusive prefix sum impl for unsigned byte values
 
 static inline
-void PrefixSum_simple(uint8_t *inBytes, int inNumBytes,
+void PrefixSum_exclusive(uint8_t *inBytes, int inNumBytes,
                       uint8_t *outBytes, int outNumBytes)
 {
 #if defined(DEBUG)
@@ -131,6 +131,30 @@ void PrefixSum_simple(uint8_t *inBytes, int inNumBytes,
     uint8_t inByte = inBytes[offset];
     outBytes[offset] = byteSum;
     byteSum += inByte;
+  }
+}
+
+// Simple serial inclusive prefix sum impl for unsigned byte values
+
+static inline
+void PrefixSum_inclusive(uint8_t *inBytes, int inNumBytes,
+                         uint8_t *outBytes, int outNumBytes)
+{
+#if defined(DEBUG)
+  assert(inNumBytes == outNumBytes);
+#endif // DEBUG
+  
+  uint8_t byteSum = 0;
+  
+  for ( int offset = 0; offset < outNumBytes; offset++ ) {
+#if defined(DEBUG)
+    assert(offset < inNumBytes);
+    assert(offset < outNumBytes);
+#endif // DEBUG
+    
+    uint8_t inByte = inBytes[offset];
+    byteSum += inByte;
+    outBytes[offset] = byteSum;
   }
 }
 

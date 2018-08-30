@@ -16,10 +16,11 @@
 
 @interface MetalPrefixSumRenderContext : NSObject
 
-// Prefix Sum Reduce step
+// Prefix Sum reduce and sweep states
 
 @property (nonatomic, retain) id<MTLRenderPipelineState> reducePipelineState;
 @property (nonatomic, retain) id<MTLRenderPipelineState> sweepPipelineState;
+@property (nonatomic, retain) id<MTLRenderPipelineState> inclusiveSweepPipelineState;
 
 #if defined(DEBUG)
 
@@ -56,51 +57,17 @@
                 inputTexture1:(id<MTLTexture>)inputTexture1
                 inputTexture2:(id<MTLTexture>)inputTexture2
                 outputTexture:(id<MTLTexture>)outputTexture
-                        level:(int)level;
+                        level:(int)level
+                  isExclusive:(BOOL)isExclusive;
 
-// Process input texture data written in block by block order from
-// the frame.inputBlockOrderTexture, generate parallel prefix sum
-// and then write the result frame.outputBlockOrderTexture
+// Process block by block order data from inputBlockOrderTexture
+// using Blelloch's work efficient method. This parallel prefix sum
+// generates an exclusive prefix sum and the result is written to
+// outputBlockOrderTexture.
 
 - (void) renderPrefixSum:(MetalRenderContext*)mrc
            commandBuffer:(id<MTLCommandBuffer>)commandBuffer
-             renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
-
-#if defined(DEBUG)
-
-// Implements debug render operation where (X,Y) values are written to a buffer
-
-//- (void) debugRenderXYToTexture:(id<MTLCommandBuffer>)commandBuffer
-//                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
-
-#endif // DEBUG
-
-/*
-
-// Render cropped INDEXES as bytes to texture
-
-- (void) renderCroppedIndexesToTexture:(id<MTLCommandBuffer>)commandBuffer
-                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
-
-// Render into the resizeable BGRA texture
-
-- (void) renderToTexture:(id<MTLCommandBuffer>)commandBuffer
-             renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
-
-// Render BGRA pixels to output texture.
-
-- (void) renderCroppedBGRAToTexture:(id<MTLCommandBuffer>)commandBuffer
-                        renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
-
-// Render from the resizable BGRA output texture into the active view
-
-- (void) renderFromTexture:(id<MTLCommandBuffer>)commandBuffer
-      renderPassDescriptor:(MTLRenderPassDescriptor*)renderPassDescriptor
-               renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
-             viewportWidth:(int)viewportWidth
-            viewportHeight:(int)viewportHeight;
-
-*/
-
+             renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+             isExclusive:(BOOL)isExclusive;
 
 @end

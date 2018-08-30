@@ -40,11 +40,15 @@
   
   NSString *sumSweepShader = @"fragmentShaderPrefixSumDownSweep";
   NSString *sumSweepShaderA7 = @"fragmentShaderPrefixSumDownSweepA7";
+
+  NSString *sumInclusiveSweepShader = @"fragmentShaderPrefixSumInclusiveDownSweep";
+  NSString *sumInclusiveSweepShaderA7 = @"fragmentShaderPrefixSumInclusiveDownSweepA7";
   
   if (gpuFamily == 1) {
     // A7
     sumReduceShader = sumReduceShaderA7;
     sumSweepShader = sumSweepShaderA7;
+    sumInclusiveSweepShader = sumInclusiveSweepShaderA7;
   }
   
   self.reducePipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
@@ -54,8 +58,6 @@
                                             fragmentFunctionName:sumReduceShader];
   
   NSAssert(self.reducePipelineState, @"reducePipelineState");
-
-  // FIXME: A7 support
   
   self.sweepPipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
                                  pipelineLabel:@"PrefixSumSweep Pipeline"
@@ -64,18 +66,14 @@
                           fragmentFunctionName:sumSweepShader];
   
   NSAssert(self.sweepPipelineState, @"sweepPipelineState");
+
+  self.inclusiveSweepPipelineState = [mrc makePipeline:MTLPixelFormatR8Unorm
+                                pipelineLabel:@"PrefixSumInclusiveSweep Pipeline"
+                               numAttachments:1
+                           vertexFunctionName:@"vertexShader"
+                         fragmentFunctionName:sumInclusiveSweepShader];
   
-#if defined(DEBUG)
-  
-  // Debug render state to emit (X,Y) for each pixel of render texture
-  
-//  self.debugRenderXYoffsetTexturePipelineState = [self makePipeline:MTLPixelFormatBGRA8Unorm
-//                                                          pipelineLabel:@"Render To XY Pipeline"
-//                                                         numAttachments:1
-//                                                     vertexFunctionName:@"vertexShader"
-//                                                   fragmentFunctionName:@"samplingShaderDebugOutXYCoordinates"];
-  
-#endif // DEBUG
+  NSAssert(self.inclusiveSweepPipelineState, @"inclusiveSweepPipelineState");
 }
 
 // Render textures initialization
@@ -360,6 +358,7 @@
                 inputTexture2:(id<MTLTexture>)inputTexture2
                 outputTexture:(id<MTLTexture>)outputTexture
                         level:(int)level
+                   isExclusive:(BOOL)isExclusive
 {
   const BOOL debug = TRUE;
   
@@ -415,7 +414,12 @@
     MTLViewport mtlvp = {0.0, 0.0, outputTexture.width, outputTexture.height, -1.0, 1.0 };
     [renderEncoder setViewport:mtlvp];
     
-    [renderEncoder setRenderPipelineState:self.sweepPipelineState];
+    if (isExclusive) {
+      [renderEncoder setRenderPipelineState:self.sweepPipelineState];
+    } else {
+      // Inclusive scan at final render stage
+      [renderEncoder setRenderPipelineState:self.inclusiveSweepPipelineState];
+    }
     
     [renderEncoder setVertexBuffer:mrc.identityVerticesBuffer
                             offset:0
@@ -439,13 +443,15 @@
   }
 }
 
-// Process input texture data written in block by block order from
-// the frame.inputBlockOrderTexture, generate parallel prefix sum
-// and then write the result frame.outputBlockOrderTexture
+// Process block by block order data from inputBlockOrderTexture
+// using Blelloch's work efficient method. This parallel prefix sum
+// generates an exclusive prefix sum and the result is written to
+// outputBlockOrderTexture.
 
 - (void) renderPrefixSum:(MetalRenderContext*)mrc
            commandBuffer:(id<MTLCommandBuffer>)commandBuffer
              renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
+             isExclusive:(BOOL)isExclusive
 {
   const BOOL debug = TRUE;
   
@@ -513,7 +519,8 @@
                    inputTexture1:inputTexture1
                    inputTexture2:inputTexture2
                    outputTexture:outputTexture
-                           level:i+1];
+                           level:i+1
+                     isExclusive:TRUE];
 
       inputTexture1 = outputTexture;
     }
@@ -536,7 +543,8 @@
                  inputTexture1:inputTexture1
                  inputTexture2:inputTexture2
                  outputTexture:outputTexture
-                         level:0];
+                         level:0
+                   isExclusive:isExclusive];
   }
   
   return;
