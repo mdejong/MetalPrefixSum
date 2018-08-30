@@ -32,10 +32,14 @@
 
 - (void) setupRenderPipelines:(MetalRenderContext*)mrc;
 
-// Huffman render textures initialization
+// Render textures initialization
+// renderSize : indicates the size of the entire texture containing block by block values
+// blockSize  : indicates the size of the block to be summed
+// renderFrame : holds textures used while rendering
 
 - (void) setupRenderTextures:(MetalRenderContext*)mrc
                   renderSize:(CGSize)renderSize
+                   blockSize:(CGSize)blockSize
                  renderFrame:(MetalPrefixSumRenderFrame*)renderFrame;
 
 // Specific render operations

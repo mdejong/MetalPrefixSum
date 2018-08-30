@@ -167,7 +167,7 @@
   
   CGSize renderSize = CGSizeMake(4, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -243,7 +243,7 @@
   
   CGSize renderSize = CGSizeMake(2, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -321,7 +321,7 @@
   
   CGSize renderSize = CGSizeMake(2, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -401,7 +401,7 @@
   
   CGSize renderSize = CGSizeMake(4, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[1];
@@ -478,7 +478,7 @@
   
   CGSize renderSize = CGSizeMake(2, 2);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -601,7 +601,7 @@
   
   CGSize renderSize = CGSizeMake(32, 32);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -738,7 +738,7 @@
   
   CGSize renderSize = CGSizeMake(16, 32);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -852,7 +852,7 @@
   
   CGSize renderSize = CGSizeMake(16, 16);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -965,7 +965,7 @@
   
   CGSize renderSize = CGSizeMake(8, 16);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -1078,7 +1078,7 @@
   
   CGSize renderSize = CGSizeMake(8, 8);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -1191,7 +1191,7 @@
   
   CGSize renderSize = CGSizeMake(4, 8);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -1293,7 +1293,7 @@
   
   CGSize renderSize = CGSizeMake(2, 2);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.zeroTexture;
   id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.reduceTextures[0];
@@ -1393,7 +1393,7 @@
   
   CGSize renderSize = CGSizeMake(2, 2);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
   id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
@@ -1493,7 +1493,7 @@
   
   CGSize renderSize = CGSizeMake(2, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
   id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
@@ -1615,7 +1615,7 @@
   
   CGSize renderSize = CGSizeMake(4, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
   id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
@@ -1753,7 +1753,7 @@
   
   CGSize renderSize = CGSizeMake(32, 32);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture1 = (id<MTLTexture>) mpsrf.reduceTextures[0];
   id<MTLTexture> inputTexture2 = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
@@ -1864,7 +1864,7 @@
   
   CGSize renderSize = CGSizeMake(2, 2);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -1941,7 +1941,7 @@
   
   CGSize renderSize = CGSizeMake(2, 2);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -2031,7 +2031,7 @@
   
   CGSize renderSize = CGSizeMake(4, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   
@@ -2177,7 +2177,7 @@
   
   CGSize renderSize = CGSizeMake(4, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -2304,7 +2304,7 @@
   
   CGSize renderSize = CGSizeMake(8, 8);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -2431,7 +2431,7 @@
   
   CGSize renderSize = CGSizeMake(16, 16);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -2558,7 +2558,7 @@
   
   CGSize renderSize = CGSizeMake(32, 32);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -2639,6 +2639,87 @@
   XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
+// Prefix sum of 2 blocks of size 2x2
+
+- (void)testMetalFullPrefixSum2x2WithTwoBlocks {
+  // Two 2x2 blocks in block by block order
+  NSArray *expectedInputArr = @[
+                                @(0), @(1), @(2), @(3),
+                                @(10), @(11), @(12), @(13)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(0), @(0), @(0+1), @(0+1+2),
+                                   @(0), @(10), @(10+11), @(10+11+12)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(2, 4);
+  CGSize blockSize = CGSizeMake(2, 2);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:blockSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture.width == 2);
+  XCTAssert(inputTexture.height == 4);
+  
+  XCTAssert(outputTexture.width == 2);
+  XCTAssert(outputTexture.height == 4);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf isExclusive:TRUE];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
 // An inclusive implementation of scan is implemented by copying all
 // the results from an exclusive scan to the left by 1 position and
 // then executing a single add operation to regenerate the final
@@ -2669,7 +2750,7 @@
   
   CGSize renderSize = CGSizeMake(2, 2);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -2765,7 +2846,7 @@
   
   CGSize renderSize = CGSizeMake(4, 4);
   
-  [mpsrc setupRenderTextures:mrc renderSize:renderSize renderFrame:mpsrf];
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:renderSize renderFrame:mpsrf];
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
@@ -2833,6 +2914,258 @@
         [self dump8BitTexture:outputTexture label:levelStr];
       }
     }
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
+- (void)testMetalFullInclusivePrefixSum2x2WithTwoBlocks {
+  // Two 2x2 blocks in block by block order
+  NSArray *expectedInputArr = @[
+                                @(0), @(1), @(2), @(3),
+                                @(10), @(11), @(12), @(13)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(0), @(0+1), @(0+1+2), @(0+1+2+3),
+                                   @(10), @(10+11), @(10+11+12), @(10+11+12+13)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(2, 4);
+  CGSize blockSize = CGSizeMake(2, 2);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:blockSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture.width == 2);
+  XCTAssert(inputTexture.height == 4);
+  
+  XCTAssert(outputTexture.width == 2);
+  XCTAssert(outputTexture.height == 4);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf isExclusive:FALSE];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
+// Four blocks at block dim 2x2, fits exactly into a square texture
+
+- (void)testMetalFullInclusivePrefixSum2x2WithFourBlocks {
+  // Four 2x2 blocks in block by block order
+  NSArray *expectedInputArr = @[
+                                @(0),  @(1), @(2), @(3),
+                                @(10), @(1), @(2), @(3),
+                                @(20), @(1), @(2), @(3),
+                                @(30), @(1), @(2), @(3)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(0),  @(0+1),  @(0+1+2),  @(0+1+2+3),
+                                   @(10), @(10+1), @(10+1+2), @(10+1+2+3),
+                                   @(20), @(20+1), @(20+1+2), @(20+1+2+3),
+                                   @(30), @(30+1), @(30+1+2), @(30+1+2+3)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(4, 4);
+  CGSize blockSize = CGSizeMake(2, 2);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:blockSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture.width == 4);
+  XCTAssert(inputTexture.height == 4);
+  
+  XCTAssert(outputTexture.width == 4);
+  XCTAssert(outputTexture.height == 4);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf isExclusive:FALSE];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
+// Four blocks at block dim 2x2, fits exactly into a square texture
+
+- (void)testMetalFullInclusivePrefixSum2x2WithThreeBlocks {
+  // Three 2x2 blocks in block by block order, note that
+  // zero padding is needed to reach a square size
+  // for the entire texture.
+  
+  NSArray *expectedInputArr = @[
+                                @(0),  @(1), @(2), @(3),
+                                @(10), @(1), @(2), @(3),
+                                @(20), @(1), @(2), @(3),
+                                @(0), @(0), @(0), @(0)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(0),  @(0+1),  @(0+1+2),  @(0+1+2+3),
+                                   @(10), @(10+1), @(10+1+2), @(10+1+2+3),
+                                   @(20), @(20+1), @(20+1+2), @(20+1+2+3),
+                                   @(0), @(0), @(0), @(0)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(4, 4);
+  CGSize blockSize = CGSizeMake(2, 2);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:blockSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture.width == 4);
+  XCTAssert(inputTexture.height == 4);
+  
+  XCTAssert(outputTexture.width == 4);
+  XCTAssert(outputTexture.height == 4);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf isExclusive:FALSE];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
   }
   
   if (dump) {
