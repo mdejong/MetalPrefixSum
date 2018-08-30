@@ -1,14 +1,14 @@
-# MetalElias
+# MetalPrefixSum
 
-A GPU based Elias gamma decoder for iOS on top of Metal, adapted from Basic Texturing example provided by Apple. This decoder is known to work on iOS and should work on other Metal capable hardware. 
+A GPU based parallel prefix sum implementation that operates on byte values. Supports both inclusive scan and exclusive scan.
 
 ## Overview
 
-This project is adapted from a Metal huffman implementation. See [MetalHuffman] https://github.com/mdejong/MetalHuffman
+This project demonstrates how Metal can be used to implement code to apply a delta to image data.
 
 ## Status
 
-This encoder/decoder implementation of GPU based Elias gamma decoding is a test of parallel block based decoding speed.
+This encoder/decoder implementation of GPU based delta is a test of parallel block based decoding speed.
 
 ## Decoding Speed
 
@@ -16,5 +16,5 @@ Please note that current results indicate decoding on the CPU is significantly f
 
 ## Implementation
 
-See AAPLRenderer.m and AAPLShaders.metal for the core GPU rendering logic. An inlined and branch free Elias gamma decoder is included.
+See AAPLRenderer.m and AAPLShaders.metal for the core GPU rendering logic.
 

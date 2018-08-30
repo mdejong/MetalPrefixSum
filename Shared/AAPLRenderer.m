@@ -112,6 +112,8 @@ const static unsigned int blockDim = 8;
   NSData *_blockInitData;
 
   NSData *_outBlockOrderSymbolsData;
+
+  NSData *_blockOrderSymbolsPreDeltas;
   
   int renderWidth;
   int renderHeight;
@@ -408,7 +410,9 @@ const static unsigned int blockDim = 8;
     
   // Make a copy of the block order symbols, since calculating deltas will replace
   // these symbols in place to minimize memory.
-    
+
+  _blockOrderSymbolsPreDeltas = [NSMutableData dataWithData:outBlockOrderSymbolsData];
+  
 #if defined(DEBUG)
     NSData *blockOrderSymbolsCopy = [NSMutableData dataWithData:outBlockOrderSymbolsData];
 #endif // DEBUG
@@ -959,6 +963,17 @@ const static unsigned int blockDim = 8;
       id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.outputBlockOrderTexture;
       
       [self dump8BitTexture:outputTexture label:@"outputTexture"];
+      
+      // FIXME: compare to original input?
+      
+      uint8_t *bytePtr = (uint8_t *) _blockOrderSymbolsPreDeltas.bytes;
+      
+      NSData *textureData = [self.class getTextureBytes:outputTexture];
+      uint8_t *texturePtr = (uint8_t*) textureData.bytes;
+      
+      assert(_blockOrderSymbolsPreDeltas.length == textureData.length);
+      int cmp = memcmp(bytePtr, texturePtr, _blockOrderSymbolsPreDeltas.length);
+      assert(cmp == 0);
     }
     
     // Output of block padded shader write operation
