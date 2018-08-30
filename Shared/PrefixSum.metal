@@ -333,7 +333,8 @@ fragmentShaderPrefixSumInclusiveDownSweep(RasterizerData in [[stage_in]],
   t2Offset += 1;
 
   // FIXME: does compile see (N % POT) as optimization like & (POT - 1) ???
-  bool isLastOne = ((t2Offset % rtd.blockWidth) == 0);
+  //bool isLastOne = ((t2Offset % rtd.blockWidth) == 0);
+  bool isLastOne = ((t2Offset & (rtd.blockWidth - 1)) == 0);
   
   if (isLastOne) {
     t2Offset -= 1;
@@ -381,7 +382,8 @@ fragmentShaderPrefixSumInclusiveDownSweepA7(RasterizerData in [[stage_in]],
   t2Offset += 1;
   
   // FIXME: does compile see (N % POT) as optimization like & (POT - 1) ???
-  bool isLastOne = ((t2Offset % rtd.blockWidth) == 0);
+  //bool isLastOne = ((t2Offset % rtd.blockWidth) == 0);
+  bool isLastOne = ((t2Offset & (rtd.blockWidth - 1)) == 0);
   
   if (isLastOne) {
     t2Offset -= 1;
