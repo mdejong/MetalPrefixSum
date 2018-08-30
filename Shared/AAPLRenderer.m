@@ -18,13 +18,11 @@ Implementation of renderer class which perfoms Metal setup and per frame renderi
 
 #import <CoreVideo/CoreVideo.h>
 
-#import "Eliasg.h"
+#import "DeltaEncoder.h"
 
 #import "ImageInputFrame.h"
 
 #import "Util.h"
-
-#import "elias_encode.h"
 
 #import "MetalRenderContext.h"
 #import "MetalPrefixSumRenderContext.h"
@@ -457,7 +455,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 #endif
     
     for ( NSMutableData *blockData in mBlocks ) {
-      NSData *deltasData = [Eliasg encodeSignedByteDeltas:blockData];
+      NSData *deltasData = [DeltaEncoder encodeSignedByteDeltas:blockData];
       
 #if defined(IMPL_DELTAS_AND_INIT_ZERO_DELTA_BEFORE_HUFF_ENCODING)
       // When saving the first element of a block, do the deltas
@@ -498,7 +496,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       }
 # endif // IMPL_DELTAS_AND_INIT_ZERO_DELTA_BEFORE_HUFF_ENCODING
       
-      NSData *decodedDeltas = [Eliasg decodeSignedByteDeltas:deltasData];
+      NSData *decodedDeltas = [DeltaEncoder decodeSignedByteDeltas:deltasData];
       NSAssert([decodedDeltas isEqualToData:blockData], @"decoded deltas");
 #endif // DEBUG
     }
@@ -569,12 +567,6 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
         NSString *path2 = [tmpDir stringByAppendingPathComponent:@"block_deltas_unsigned.bytes"];
         [mData writeToFile:path2 atomically:TRUE];
         NSLog(@"wrote %@", path2);
-        
-        // Calculate number of bits needed to store this data as elias gamma encoding
-        
-        int numBits = elias_gamma_num_bits((uint8_t*)mData.bytes, bytePtrLength);
-
-        NSLog(@"elias gamma encoded num bytes %d", numBits/8);
     }
 
   // number of blocks must be an exact multiple of the block dimension
@@ -615,21 +607,6 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       [self.mrc setupMetal:mtkView.device];
       
       [self.mpsrc setupRenderPipelines:self.mrc];
-
-      // Texture Cache
-      
-//      {
-//        // Disable flushing of textures
-//
-//        NSDictionary *cacheAttributes = @{
-//                                          (NSString*)kCVMetalTextureCacheMaximumTextureAgeKey: @(0),
-//                                          };
-//
-////        NSDictionary *cacheAttributes = nil;
-//
-//        CVReturn status = CVMetalTextureCacheCreate(kCFAllocatorDefault, (__bridge CFDictionaryRef)cacheAttributes, _device, nil, &_textureCache);
-//        NSParameterAssert(status == kCVReturnSuccess && _textureCache != NULL);
-//      }
       
       // Query size and byte data for input frame that will be rendered
       
@@ -902,7 +879,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     
     // Convert deltas from zigzag back to plain deltas, then sum to undo deltas
     
-    NSData *decodedDeltas = [Eliasg decodeSignedByteDeltas:_outBlockOrderSymbolsData];
+    NSData *decodedDeltas = [DeltaEncoder decodeSignedByteDeltas:_outBlockOrderSymbolsData];
     [self.mrc fill8bitTexture:inputTexture bytes:(uint8_t*)decodedDeltas.bytes];
   }
   
