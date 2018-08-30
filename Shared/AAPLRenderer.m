@@ -112,6 +112,8 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   NSData *_blockByBlockReorder;
 
   NSData *_blockInitData;
+
+  NSData *_outBlockOrderSymbolsData;
   
   int renderWidth;
   int renderHeight;
@@ -356,7 +358,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   return;
 }
 
-- (void) setupEliasgEncoding
+- (void) setupBlockEncoding
 {
   unsigned int width = self->renderWidth;
   unsigned int height = self->renderHeight;
@@ -579,108 +581,9 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   
   assert((outBlockOrderSymbolsNumBytes % (blockDim * blockDim)) == 0);
   
-  [Eliasg encodeBits:outBlockOrderSymbolsPtr
-          inNumBytes:outBlockOrderSymbolsNumBytes
-            outCodes:outCodes
-  outBlockBitOffsets:outBlockBitOffsets
-               width:blockWidth*blockDim
-              height:blockHeight*blockDim
-            blockDim:blockDim];
-  
-  if ((1)) {
-    printf("inNumBytes   %8d\n", outBlockOrderSymbolsNumBytes);
-    printf("outNumBytes  %8d\n", (int)outCodes.length);
-  }
-    
-  if ((0)) {
-        NSString *tmpDir = NSTemporaryDirectory();
-        NSString *path = [tmpDir stringByAppendingPathComponent:@"block_encoded_elias.bytes"];
-        [outCodes writeToFile:path atomically:TRUE];
-        NSLog(@"wrote %@", path);
-  }
-  
-  // FIXME: allocate huffman encoded bytes with no copy option to share existing mem?
-  // Otherise allocate and provide way to read bytes directly into allocated buffer.
-  
-  uint8_t *encodedSymbolsPtr = outCodes.mutableBytes;
-  int encodedSymbolsNumBytes = (int) outCodes.length;
-  
-  // Allocate a new buffer that accounts for read ahead space
-  // and copy huffman encoded symbols into the allocated buffer.
-  
-  _bitsBuff = [self.mrc.device newBufferWithLength:encodedSymbolsNumBytes
-                                   options:MTLResourceStorageModeShared];
-  
-  memcpy(_bitsBuff.contents, encodedSymbolsPtr, encodedSymbolsNumBytes);
-  
-  if ((0)) {
-    // Encoded huffman symbols as hex?
-    
-    fprintf(stdout, "encodedSymbols\n");
-    
-    for (int i = 0; i < encodedSymbolsNumBytes; i++) {
-      int symbol = encodedSymbolsPtr[i];
-      
-      fprintf(stdout, "%2X \n", symbol);
-    }
-    
-    fprintf(stdout, "done encodedSymbols\n");
-  }
-  
-  // Init memory buffer that holds bit offsets for each block
+  // Copy encoded block order bytes
 
-  assert(outBlockBitOffsets.length == _blockStartBitOffsets.length);
-    
-  uint32_t *blockInPtr = (uint32_t *) outBlockBitOffsets.bytes;
-  uint32_t *blockOutPtr = (uint32_t *) _blockStartBitOffsets.contents;
-  int numBlocks = (int)_blockStartBitOffsets.length / sizeof(uint32_t);
-  assert(numBlocks == (blockWidth * blockHeight));
-  
-  for (int blocki = 0; blocki < numBlocks; blocki++) {
-    int blockiOffset = blockInPtr[blocki];
-    blockOutPtr[blocki] = blockiOffset;
-    
-    if ((0)) {
-#if defined(DEBUG)
-      fprintf(stdout, "block[%5d] = %5d (bitOffsetsPtr[%5d])\n", blocki, blockOutPtr[blocki], blockiOffset);
-#endif // DEBUG
-    }
-  }
-    
-  // Once elias VLS have been encoded and block start offsets have been calculated, it is
-  // possible to execute shader simulation that checks the contents of the generated
-  // buffers with regular C code.
-    
-#if defined(DEBUG)
-    {
-        // These are the decoded deltas turned back into signed deltas
-        uint8_t *decodedSymbols = malloc(outBlockOrderSymbolsNumBytes);
-        assert(decodedSymbols);
-        
-        [Eliasg decodeBlockSymbols:outBlockOrderSymbolsNumBytes
-                           bitBuff:(uint8_t*)outCodes.bytes
-                          bitBuffN:(int)outCodes.length
-                         outBuffer:decodedSymbols
-           blockStartBitOffsetsPtr:blockOutPtr];
-
-        uint8_t *originalBlockOrderSymbolsPtr = (uint8_t *) blockOrderSymbolsCopy.bytes;
-        
-        for ( int i = 0; i < outBlockOrderSymbolsNumBytes; i++) {
-            int inSymbol = originalBlockOrderSymbolsPtr[i];
-            int outSymbol = decodedSymbols[i];
-            if (inSymbol != outSymbol) {
-                printf("offset %d : inSymbol != outSymbol : %d != %d\n", i, inSymbol, outSymbol);
-                assert(0);
-            } else {
-                if ((0)) {
-                  printf("offset %d : inSymbol == outSymbol : %d == %d\n", i, inSymbol, outSymbol);
-                }
-            }
-        }
-        
-        free(decodedSymbols);
-    }
-#endif // DEBUG
+  _outBlockOrderSymbolsData = [NSData dataWithData:outBlockOrderSymbolsData];
   
   return;
 }
@@ -732,12 +635,12 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       
       ImageInputFrameConfig hcfg;
       
-      hcfg = TEST_4x4_INCREASING1;
+//      hcfg = TEST_4x4_INCREASING1;
 //      hcfg = TEST_4x4_INCREASING2;
 //      hcfg = TEST_4x8_INCREASING1;
 //      hcfg = TEST_2x8_INCREASING1;
 //      hcfg = TEST_6x4_NOT_SQUARE;
-//      hcfg = TEST_8x8_IDENT;
+      hcfg = TEST_8x8_IDENT;
 //      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
 //      hcfg = TEST_16x16_IDENT2;
@@ -791,11 +694,14 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       
       // Allocate prefix sum textures
       
-      CGSize renderSize = CGSizeMake(width,height);
-      
       MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
       
-      [self.mpsrc setupRenderTextures:self.mrc renderSize:renderSize renderFrame:mpsrf];
+      // This block size indicates the number of prefix sum values to sum
+      // together. Pass (32,32) for a 3x * 32 values per block.
+      
+      CGSize prefixSumBlockSize = CGSizeMake(width, height);
+      
+      [self.mpsrc setupRenderTextures:self.mrc renderSize:prefixSumBlockSize renderFrame:mpsrf];
       
       self.mpsRenderFrame = mpsrf;
       
@@ -837,6 +743,10 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       _render_texture = [self makeBGRATexture:CGSizeMake(width,height) pixels:NULL];
 
       // Render stages
+      
+      _imageInputBytes = renderFrame.inputData;
+      
+      [self setupBlockEncoding];
       
     } // end of init if block
   
@@ -962,6 +872,10 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 /// Called whenever the view needs to render a frame
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
+  if (_outBlockOrderSymbolsData == nil) {
+    return;
+  }
+  
   // Create a new command buffer
   
   id <MTLCommandBuffer> commandBuffer = [self.mrc.commandQueue commandBuffer];
@@ -977,11 +891,20 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
   // Prefix sum setup and render steps
   
   MetalPrefixSumRenderFrame *mpsRenderFrame = self.mpsRenderFrame;
-
-  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
-  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.reduceTextures[0];
   
-  [self.mpsrc renderPrefixSumReduce:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [self.mpsrc renderPrefixSum:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame];
+  
+  {
+    // Copy prefix sum delta input bytes into block order texture
+    id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
+    
+    NSAssert(_outBlockOrderSymbolsData, @"_outBlockOrderSymbolsData");
+    
+    // Convert deltas from zigzag back to plain deltas, then sum to undo deltas
+    
+    NSData *decodedDeltas = [Eliasg decodeSignedByteDeltas:_outBlockOrderSymbolsData];
+    [self.mrc fill8bitTexture:inputTexture bytes:(uint8_t*)decodedDeltas.bytes];
+  }
   
   // --------------------------------------------------------------------------
   
@@ -1034,17 +957,15 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     
     if (isCaptureRenderedTextureEnabled) {
       
-      // Dump contents of prefix sum render
-      
-      //   MetalPrefixSumRenderFrame *mpsRenderFrame = self.mpsRenderFrame;
+      // Dump contents of prefix sum render outpu
       
       id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
       
-      [self dump8BitTexture:inputTexture label:@"inputTextureD1"];
+      [self dump8BitTexture:inputTexture label:@"inputTexture"];
       
-      id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.reduceTextures[0];
+      id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.outputBlockOrderTexture;
       
-      [self dump8BitTexture:outputTexture label:@"outputTextureD1"];
+      [self dump8BitTexture:outputTexture label:@"outputTexture"];
     }
     
     // Output of block padded shader write operation
