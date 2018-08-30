@@ -28,7 +28,7 @@ Implementation of renderer class which perfoms Metal setup and per frame renderi
 #import "MetalPrefixSumRenderContext.h"
 #import "MetalPrefixSumRenderFrame.h"
 
-const static unsigned int blockDim = HUFF_BLOCK_DIM;
+const static unsigned int blockDim = 8;
 
 @interface AAPLRenderer ()
 
@@ -413,7 +413,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     NSData *blockOrderSymbolsCopy = [NSMutableData dataWithData:outBlockOrderSymbolsData];
 #endif // DEBUG
   
-  if ((0)) {
+  if ((1)) {
     //        for (int i = 0; i < outBlockOrderSymbolsNumBytes; i++) {
     //          printf("outBlockOrderSymbolsPtr[%5i] = %d\n", i, outBlockOrderSymbolsPtr[i]);
     //        }
@@ -518,7 +518,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 #endif
   }
   
-  if ((0)) {
+  if ((1)) {
     //        for (int i = 0; i < outBlockOrderSymbolsNumBytes; i++) {
     //          printf("outBlockOrderSymbolsPtr[%5i] = %d\n", i, outBlockOrderSymbolsPtr[i]);
     //        }
@@ -607,6 +607,21 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
       [self.mrc setupMetal:mtkView.device];
       
       [self.mpsrc setupRenderPipelines:self.mrc];
+
+      // Texture Cache
+      
+//      {
+//        // Disable flushing of textures
+//
+//        NSDictionary *cacheAttributes = @{
+//                                          (NSString*)kCVMetalTextureCacheMaximumTextureAgeKey: @(0),
+//                                          };
+//
+////        NSDictionary *cacheAttributes = nil;
+//
+//        CVReturn status = CVMetalTextureCacheCreate(kCFAllocatorDefault, (__bridge CFDictionaryRef)cacheAttributes, _device, nil, &_textureCache);
+//        NSParameterAssert(status == kCVReturnSuccess && _textureCache != NULL);
+//      }
       
       // Query size and byte data for input frame that will be rendered
       
@@ -617,7 +632,8 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
 //      hcfg = TEST_4x8_INCREASING1;
 //      hcfg = TEST_2x8_INCREASING1;
 //      hcfg = TEST_6x4_NOT_SQUARE;
-      hcfg = TEST_8x8_IDENT;
+//      hcfg = TEST_8x8_IDENT;
+      hcfg = TEST_8x8_DELTA_IDENT;
 //      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
 //      hcfg = TEST_16x16_IDENT2;
@@ -879,7 +895,7 @@ const static unsigned int blockDim = HUFF_BLOCK_DIM;
     
     // Convert deltas from zigzag back to plain deltas, then sum to undo deltas
     
-    NSData *decodedDeltas = [DeltaEncoder decodeSignedByteDeltas:_outBlockOrderSymbolsData];
+    NSData *decodedDeltas = [DeltaEncoder decodeZigZagBytes:_outBlockOrderSymbolsData];
     [self.mrc fill8bitTexture:inputTexture bytes:(uint8_t*)decodedDeltas.bytes];
   }
   

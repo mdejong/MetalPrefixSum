@@ -3,8 +3,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import "VariableBitWidthSymbol.h"
-
 // Our platform independent render class
 @interface DeltaEncoder : NSObject
 
@@ -18,5 +16,9 @@
 // signed 8 bit deltas to recover the original symbols as uint8_t.
 
 + (NSData*) decodeSignedByteDeltas:(NSData*)deltas;
+
+// Reverse zigzag encoding on deltas but do not undelta the data.
+
++ (NSData*) decodeZigZagBytes:(NSData*)deltas;
 
 @end

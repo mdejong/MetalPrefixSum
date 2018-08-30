@@ -191,7 +191,7 @@ pixelpack_int8_to_offset_uint8(int8_t value)
   return [NSData dataWithData:outZerodDeltaBytes];
 }
 
-// Decode symbols by reversing zerod mapping and then applying
+// Decode symbols by reversing zigzag mapping and then applying
 // signed 8 bit deltas to recover the original symbols as uint8_t.
 
 + (NSData*) decodeSignedByteDeltas:(NSData*)deltas
@@ -215,6 +215,29 @@ pixelpack_int8_to_offset_uint8(int8_t value)
   [mData setLength:maxNumBytes];
   memcpy((void*)mData.mutableBytes, (void*)outSymbols.data(), maxNumBytes);
     
+  return [NSData dataWithData:mData];
+}
+
+// Reverse zigzag encoding on deltas but do not undelta the data.
+
++ (NSData*) decodeZigZagBytes:(NSData*)deltas
+{
+  const int maxNumBytes = (int) deltas.length;
+  
+  vector<uint8_t> signedDeltaBytes;
+  signedDeltaBytes.resize(maxNumBytes);
+  const uint8_t *zerodDeltasPtr = (uint8_t *) deltas.bytes;
+  
+  for (int i = 0; i < maxNumBytes; i++) {
+    uint8_t zerodVal = zerodDeltasPtr[i];
+    int8_t sVal = pixelpack_offset_uint8_to_int8(zerodVal);
+    signedDeltaBytes[i] = (uint8_t) sVal;
+  }
+  
+  NSMutableData *mData = [NSMutableData data];
+  [mData setLength:maxNumBytes];
+  memcpy((void*)mData.mutableBytes, (void*)signedDeltaBytes.data(), maxNumBytes);
+  
   return [NSData dataWithData:mData];
 }
 

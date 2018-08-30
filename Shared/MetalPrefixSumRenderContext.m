@@ -91,7 +91,7 @@
   unsigned int width = renderSize.width;
   unsigned int height = renderSize.height;
 
-  const int blockDim = HUFF_BLOCK_DIM;
+  const int blockDim = 32;
   
   renderFrame.width = width;
   renderFrame.height = height;

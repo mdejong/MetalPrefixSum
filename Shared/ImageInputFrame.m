@@ -296,17 +296,11 @@ appendXYCoordPixelsAsData(NSMutableArray * mArr, NSArray * values)
       renderFrame.renderHeight = 8;
       
       {
-        NSArray *values = @[
-                            @0,  @1,  @4,  @5,   @10, @11, @14, @15,
-                            @2,  @3,  @6,  @7,   @12, @13, @16, @17,
-                            @8,  @9,  @12, @13,  @18, @19, @22, @23,
-                            @10, @11, @14, @15,  @20, @21, @24, @25,
-                            
-                            @30, @31, @34, @35,  @40, @41, @44, @45,
-                            @32, @33, @36, @37,  @42, @43, @46, @47,
-                            @38, @39, @42, @43,  @48, @49, @52, @53,
-                            @40, @41, @44, @45,  @50, @51, @54, @55,
-                            ];
+        NSMutableArray *values = [NSMutableArray array];
+        
+        for ( int i = 0; i < 64; i++ ) {
+          [values addObject:@(i)];
+        }
         
         renderFrame.inputData = [Util bytesArrayToData:values];
       }
@@ -314,6 +308,28 @@ appendXYCoordPixelsAsData(NSMutableArray * mArr, NSArray * values)
       break;
     }
 
+    case TEST_8x8_DELTA_IDENT: {
+      renderFrame.renderWidth  = 8;
+      renderFrame.renderHeight = 8;
+      
+      {
+        NSMutableArray *values = [NSMutableArray array];
+        
+        int delta = 0;
+        int value = 0;
+        
+        for ( int i = 0; i < 8*8; i++ ) {
+          value += delta;
+          delta += 1;
+          [values addObject:@(value & 0xFF)];
+        }
+        
+        renderFrame.inputData = [Util bytesArrayToData:values];
+      }
+      
+      break;
+    }
+    
     case TEST_16x8_IDENT: {
       renderFrame.renderWidth = 16;
       renderFrame.renderHeight = 8;

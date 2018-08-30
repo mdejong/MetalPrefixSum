@@ -158,7 +158,6 @@
 		3C1C56B21FE4433E0024A55E /* ImageIpadSize.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageIpadSize.png; sourceTree = "<group>"; };
 		3C4DC8FA1FDB495F00AABD25 /* ImageHuge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageHuge.png; sourceTree = "<group>"; };
 		3C56AF9A1FEC70F000005C41 /* BigBridge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BigBridge.png; sourceTree = "<group>"; };
-		3C56AF9F1FECE8F900005C41 /* VariableBitWidthSymbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VariableBitWidthSymbol.h; sourceTree = "<group>"; };
 		3CB220A81F7E03FF0023B470 /* Image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Image.png; sourceTree = "<group>"; };
 		3CDE879D1FBDFE1300EDB3FC /* DeltaEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeltaEncoder.h; sourceTree = "<group>"; };
 		3CDE879E1FBDFE1300EDB3FC /* DeltaEncoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DeltaEncoder.mm; sourceTree = "<group>"; };
@@ -277,7 +276,6 @@
 				3AF7E9BE1EB64A46003BB06D /* AAPLRenderer.h */,
 				3AF7E9BF1EB64A46003BB06D /* AAPLRenderer.m */,
 				3C0604722134A0F50035E5EC /* prefix_sum.h */,
-				3C56AF9F1FECE8F900005C41 /* VariableBitWidthSymbol.h */,
 				3CDE879D1FBDFE1300EDB3FC /* DeltaEncoder.h */,
 				3CDE879E1FBDFE1300EDB3FC /* DeltaEncoder.mm */,
 				3CDE87A01FC0FAAC00EDB3FC /* Util.h */,
