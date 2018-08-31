@@ -452,7 +452,7 @@ const static unsigned int blockDim = 8;
 #endif
     
     for ( NSMutableData *blockData in mBlocks ) {
-      NSData *deltasData = [DeltaEncoder encodeSignedByteDeltas:blockData];
+      NSData *deltasData = [DeltaEncoder encodeByteDeltas:blockData];
       
 #if defined(IMPL_DELTAS_AND_INIT_ZERO_DELTA_BEFORE_HUFF_ENCODING)
       // When saving the first element of a block, do the deltas
@@ -493,7 +493,7 @@ const static unsigned int blockDim = 8;
       }
 # endif // IMPL_DELTAS_AND_INIT_ZERO_DELTA_BEFORE_HUFF_ENCODING
       
-      NSData *decodedDeltas = [DeltaEncoder decodeSignedByteDeltas:deltasData];
+      NSData *decodedDeltas = [DeltaEncoder decodeByteDeltas:deltasData];
       NSAssert([decodedDeltas isEqualToData:blockData], @"decoded deltas");
 #endif // DEBUG
     }
@@ -929,8 +929,8 @@ const static unsigned int blockDim = 8;
     
     // Convert deltas from zigzag back to plain deltas, then sum to undo deltas
     
-    NSData *decodedDeltas = [DeltaEncoder decodeZigZagBytes:_outBlockOrderSymbolsData];
-    [self.mrc fill8bitTexture:inputTexture bytes:(uint8_t*)decodedDeltas.bytes];
+    //NSData *decodedDeltas = [DeltaEncoder decodeZigZagBytes:_outBlockOrderSymbolsData];
+    [self.mrc fill8bitTexture:inputTexture bytes:(uint8_t*)_outBlockOrderSymbolsData.bytes];
   }
   
   // Cropping copy operation from _renderToTexturePipelineState which is unsigned int values

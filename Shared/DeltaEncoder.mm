@@ -167,7 +167,7 @@ pixelpack_int8_to_offset_uint8(int8_t value)
 // and then converting to zerod deltas which can
 // be represented as positive integer values.
 
-+ (NSData*) encodeSignedByteDeltas:(NSData*)data
++ (NSData*) encodeByteDeltas:(NSData*)data
 {
   vector<int8_t> inBytes;
   inBytes.resize(data.length);
@@ -184,8 +184,7 @@ pixelpack_int8_to_offset_uint8(int8_t value)
 
   for (int i = 0; i < maxNumBytes; i++) {
       int8_t sVal = outSignedDeltaBytes[i];
-      uint8_t zerodVal = pixelpack_int8_to_offset_uint8(sVal);
-      *outZerodDeltaPtr++ = zerodVal;
+      *outZerodDeltaPtr++ = sVal;
   }
 
   return [NSData dataWithData:outZerodDeltaBytes];
@@ -194,7 +193,7 @@ pixelpack_int8_to_offset_uint8(int8_t value)
 // Decode symbols by reversing zigzag mapping and then applying
 // signed 8 bit deltas to recover the original symbols as uint8_t.
 
-+ (NSData*) decodeSignedByteDeltas:(NSData*)deltas
++ (NSData*) decodeByteDeltas:(NSData*)deltas
 {
   const int maxNumBytes = (int) deltas.length;
 
@@ -203,9 +202,8 @@ pixelpack_int8_to_offset_uint8(int8_t value)
   const uint8_t *zerodDeltasPtr = (uint8_t *) deltas.bytes;
   
   for (int i = 0; i < maxNumBytes; i++) {
-    uint8_t zerodVal = zerodDeltasPtr[i];
-    int8_t sVal = pixelpack_offset_uint8_to_int8(zerodVal);
-    signedDeltaBytes[i] = (uint8_t) sVal;
+    uint8_t bVal = zerodDeltasPtr[i];
+    signedDeltaBytes[i] = bVal;
   }
 
   // Apply signed deltas
@@ -215,29 +213,6 @@ pixelpack_int8_to_offset_uint8(int8_t value)
   [mData setLength:maxNumBytes];
   memcpy((void*)mData.mutableBytes, (void*)outSymbols.data(), maxNumBytes);
     
-  return [NSData dataWithData:mData];
-}
-
-// Reverse zigzag encoding on deltas but do not undelta the data.
-
-+ (NSData*) decodeZigZagBytes:(NSData*)deltas
-{
-  const int maxNumBytes = (int) deltas.length;
-  
-  vector<uint8_t> signedDeltaBytes;
-  signedDeltaBytes.resize(maxNumBytes);
-  const uint8_t *zerodDeltasPtr = (uint8_t *) deltas.bytes;
-  
-  for (int i = 0; i < maxNumBytes; i++) {
-    uint8_t zerodVal = zerodDeltasPtr[i];
-    int8_t sVal = pixelpack_offset_uint8_to_int8(zerodVal);
-    signedDeltaBytes[i] = (uint8_t) sVal;
-  }
-  
-  NSMutableData *mData = [NSMutableData data];
-  [mData setLength:maxNumBytes];
-  memcpy((void*)mData.mutableBytes, (void*)signedDeltaBytes.data(), maxNumBytes);
-  
   return [NSData dataWithData:mData];
 }
 
