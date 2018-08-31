@@ -73,8 +73,8 @@ fragmentFillShader2(RasterizerData in [[stage_in]])
   return float4(0.0, 1.0 - in.textureCoordinate.y, in.textureCoordinate.y, 1.0);
 }
 
-// Fragment function that crops from the input texture while rendering
-// pixels to the output texture.
+// Fragment function that crops from grayscale 8 bit input texture while rendering
+// BGRA grayscale pixels to the output texture.
 
 fragment half4
 samplingCropShader(RasterizerData in [[stage_in]],

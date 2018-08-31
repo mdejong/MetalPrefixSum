@@ -58,13 +58,6 @@ const static unsigned int blockDim = 8;
   
   // The Metal textures that will hold fragment shader output
   
-  // This texture will contain the output of each symbol
-  // render above with a "slice" that is the height of one
-  // of the render textures. The results will all be blitted
-  // into this texture at known offsets that indicate a "slice".
-  
-  id<MTLTexture> _renderCombinedSlices;
-  
     // render to texture pipeline is used to render into a texture
     id<MTLRenderPipelineState> _renderToTexturePipelineState;
   
@@ -417,7 +410,7 @@ const static unsigned int blockDim = 8;
     NSData *blockOrderSymbolsCopy = [NSMutableData dataWithData:outBlockOrderSymbolsData];
 #endif // DEBUG
   
-  if ((1)) {
+  if ((0)) {
     //        for (int i = 0; i < outBlockOrderSymbolsNumBytes; i++) {
     //          printf("outBlockOrderSymbolsPtr[%5i] = %d\n", i, outBlockOrderSymbolsPtr[i]);
     //        }
@@ -522,7 +515,7 @@ const static unsigned int blockDim = 8;
 #endif
   }
   
-  if ((1)) {
+  if ((0)) {
     //        for (int i = 0; i < outBlockOrderSymbolsNumBytes; i++) {
     //          printf("outBlockOrderSymbolsPtr[%5i] = %d\n", i, outBlockOrderSymbolsPtr[i]);
     //        }
@@ -637,7 +630,7 @@ const static unsigned int blockDim = 8;
 //      hcfg = TEST_2x8_INCREASING1;
 //      hcfg = TEST_6x4_NOT_SQUARE;
 //      hcfg = TEST_8x8_IDENT;
-      hcfg = TEST_8x8_DELTA_IDENT;
+//      hcfg = TEST_8x8_DELTA_IDENT;
 //      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
 //      hcfg = TEST_16x16_IDENT2;
@@ -650,7 +643,7 @@ const static unsigned int blockDim = 8;
       //hcfg = TEST_IMAGE1;
       //hcfg = TEST_IMAGE2;
       //hcfg = TEST_IMAGE3;
-      //hcfg = TEST_IMAGE4;
+      hcfg = TEST_IMAGE4;
       
       ImageInputFrame *renderFrame = [ImageInputFrame frameForConfig:hcfg];
       
@@ -694,14 +687,48 @@ const static unsigned int blockDim = 8;
       MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
       
       // This block size indicates the number of prefix sum values to sum
-      // together. Pass (32,32) for a 3x * 32 values per block.
+      // together. Pass (32,32) for a (32 * 32) values per block.
       
       CGSize prefixSumBlockSize = CGSizeMake(width, height);
-      CGSize blockSize = CGSizeMake(width, height);
+      CGSize blockSize = CGSizeMake(blockDim, blockDim);
       
       [self.mpsrc setupRenderTextures:self.mrc renderSize:prefixSumBlockSize blockSize:blockSize renderFrame:mpsrf];
       
       self.mpsRenderFrame = mpsrf;
+      
+      // Crop/Copy shader that operates on image order bytes and write BGRA grayscale pixels
+      
+      {
+        // Load the vertex function from the library
+        id <MTLFunction> vertexFunction = [self.mrc.defaultLibrary newFunctionWithName:@"vertexShader"];
+        
+        // Load the fragment function from the library
+        
+        id <MTLFunction> fragmentFunction = [self.mrc.defaultLibrary newFunctionWithName:@"samplingCropShader"];
+        assert(fragmentFunction);
+        
+        // Set up a descriptor for creating a pipeline state object
+        MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
+        pipelineStateDescriptor.label = @"Render To Texture Pipeline";
+        pipelineStateDescriptor.vertexFunction = vertexFunction;
+        pipelineStateDescriptor.fragmentFunction = fragmentFunction;
+        pipelineStateDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+        //pipelineStateDescriptor.stencilAttachmentPixelFormat =  mtkView.depthStencilPixelFormat; // MTLPixelFormatStencil8
+        
+        NSError *error = nil;
+        
+        _renderToTexturePipelineState = [self.mrc.device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
+                                                                                error:&error];
+        if (!_renderToTexturePipelineState)
+        {
+          // Pipeline State creation could fail if we haven't properly set up our pipeline descriptor.
+          //  If the Metal API validation is enabled, we can find out more information about what
+          //  went wrong.  (Metal API validation is enabled by default when a debug build is run
+          //  from Xcode)
+          NSLog(@"Failed to created pipeline state, error %@", error);
+        }
+        
+      }
       
       // Simple Render
       
@@ -892,6 +919,8 @@ const static unsigned int blockDim = 8;
   
   [self.mpsrc renderPrefixSum:self.mrc commandBuffer:commandBuffer renderFrame:mpsRenderFrame isExclusive:FALSE];
   
+  id<MTLTexture> prefixSumOutputTexture = (id<MTLTexture>) mpsRenderFrame.outputBlockOrderTexture;
+  
   {
     // Copy prefix sum delta input bytes into block order texture
     id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
@@ -904,9 +933,54 @@ const static unsigned int blockDim = 8;
     [self.mrc fill8bitTexture:inputTexture bytes:(uint8_t*)decodedDeltas.bytes];
   }
   
-  // --------------------------------------------------------------------------
+  // Cropping copy operation from _renderToTexturePipelineState which is unsigned int values
+  // to _render_texture which contains pixel values. This copy operation will expand single
+  // byte values emitted by the huffman decoder as grayscale pixels.
   
-  // Obtain a renderPassDescriptor generated from the view's drawable textures
+  MTLRenderPassDescriptor *renderToTexturePassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+  
+  if (renderToTexturePassDescriptor != nil)
+  {
+    renderToTexturePassDescriptor.colorAttachments[0].texture = _render_texture;
+    renderToTexturePassDescriptor.colorAttachments[0].loadAction = MTLLoadActionDontCare;
+    renderToTexturePassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    
+    id <MTLRenderCommandEncoder> renderEncoder =
+    [commandBuffer renderCommandEncoderWithDescriptor:renderToTexturePassDescriptor];
+    renderEncoder.label = @"RenderToTextureCommandEncoder";
+    
+    [renderEncoder pushDebugGroup: @"RenderToTexture"];
+    
+    // Set the region of the drawable to which we'll draw.
+    
+    MTLViewport mtlvp = {0.0, 0.0, _render_texture.width, _render_texture.height, -1.0, 1.0 };
+    [renderEncoder setViewport:mtlvp];
+    
+    [renderEncoder setRenderPipelineState:_renderToTexturePipelineState];
+    
+    [renderEncoder setVertexBuffer:self.mrc.identityVerticesBuffer
+                            offset:0
+                           atIndex:AAPLVertexInputIndexVertices];
+    
+    [renderEncoder setFragmentTexture:prefixSumOutputTexture
+                              atIndex:0];
+    
+    [renderEncoder setFragmentBuffer:_renderTargetDimensionsAndBlockDimensionsUniform
+                              offset:0
+                             atIndex:0];
+    
+    // Draw the 3 vertices of our triangle
+    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
+                      vertexStart:0
+                      vertexCount:_numVertices];
+    
+    [renderEncoder popDebugGroup]; // RenderToTexture
+    
+    [renderEncoder endEncoding];
+  }
+
+  // Render the already cropped image and resize to fit view drawable size
+  
   MTLRenderPassDescriptor *renderPassDescriptor = view.currentRenderPassDescriptor;
   
   if(renderPassDescriptor != nil)
@@ -955,15 +1029,21 @@ const static unsigned int blockDim = 8;
     
     if (isCaptureRenderedTextureEnabled) {
       
-      // Dump contents of prefix sum render outpu
+      // Dump contents of prefix sum render output
+      
+      const BOOL debug = FALSE;
       
       id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
       
+      if (debug) {
       [self dump8BitTexture:inputTexture label:@"inputTexture"];
+      }
       
       id<MTLTexture> outputTexture = (id<MTLTexture>) mpsRenderFrame.outputBlockOrderTexture;
-      
+
+      if (debug) {
       [self dump8BitTexture:outputTexture label:@"outputTexture"];
+      }
       
       // FIXME: compare to original input?
       
@@ -976,15 +1056,9 @@ const static unsigned int blockDim = 8;
       int cmp = memcmp(bytePtr, texturePtr, _blockOrderSymbolsPreDeltas.length);
       assert(cmp == 0);
     }
-    
-    // Output of block padded shader write operation
-    
-    if (isCaptureRenderedTextureEnabled && self.imageInputFrame.capture && 0) {
-      [self dump4ByteTexture:_renderCombinedSlices label:@"_renderCombinedSlices"];
-    }
-    
+        
     // Capture the render to texture state at the render to size
-    if (isCaptureRenderedTextureEnabled && 0) {
+    if (isCaptureRenderedTextureEnabled && 1) {
       // Query output texture
       
       id<MTLTexture> outTexture = _render_texture;
