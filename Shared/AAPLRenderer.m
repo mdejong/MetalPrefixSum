@@ -629,9 +629,9 @@ const static unsigned int blockDim = 8;
 //      hcfg = TEST_4x8_INCREASING1;
 //      hcfg = TEST_2x8_INCREASING1;
 //      hcfg = TEST_6x4_NOT_SQUARE;
-      hcfg = TEST_8x8_IDENT;
+//      hcfg = TEST_8x8_IDENT;
 //      hcfg = TEST_8x8_DELTA_IDENT;
-//      hcfg = TEST_16x8_IDENT;
+      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
 //      hcfg = TEST_16x16_IDENT2;
 //      hcfg = TEST_16x16_IDENT3;
@@ -1031,7 +1031,7 @@ const static unsigned int blockDim = 8;
       
       // Dump contents of prefix sum render output
       
-      const BOOL debug = TRUE;
+      const BOOL debug = FALSE;
       
       id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
       
@@ -1073,7 +1073,7 @@ const static unsigned int blockDim = 8;
       
       // Dump output words as BGRA
       
-      if ((1)) {
+      if ((0)) {
         // Dump 24 bit values as int
         
         fprintf(stdout, "_render_texture\n");
@@ -1114,7 +1114,7 @@ const static unsigned int blockDim = 8;
         fprintf(stdout, "done\n");
       }
       
-      if ((1)) {
+      if ((0)) {
         // Dump 24 bit values as int
         
         fprintf(stdout, "expected symbols\n");
@@ -1141,7 +1141,7 @@ const static unsigned int blockDim = 8;
       
       // Compare output to expected output
       
-      if ((1)) {
+      if ((0)) {
         NSData *expectedData = _imageInputBytes;
         assert(expectedData);
         uint8_t *expectedDataPtr = (uint8_t *) expectedData.bytes;

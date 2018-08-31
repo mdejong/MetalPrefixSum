@@ -81,14 +81,29 @@ samplingCropShader(RasterizerData in [[stage_in]],
                    texture2d<half, access::read> inTexture [[ texture(0) ]],
                    constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
 {
-  // Convert float coordinates to integer (X,Y) offsets
-  const float2 textureSize = float2(rtd.width, rtd.height);
-  float2 c = in.textureCoordinate;
-  const float2 halfPixel = (1.0 / textureSize) / 2.0;
-  c -= halfPixel;
-  ushort2 iCoordinates = ushort2(round(c * textureSize));
+  const ushort2 renderSize = ushort2(rtd.width, rtd.height);
+  ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
+
+  // Map gid from image order coords to block by block order
+  // by figuring out the offset from block root to this coord
+  // and then read from a global offset that is that number
+  // of positions from where that block begins.
   
-  half value = inTexture.read(iCoordinates).x;
+  // uint coords_to_offset(const ushort width, const ushort2 coords)
+  // ushort2 offset_to_coords(const ushort blockDim, const uint offset)
+  
+  const ushort blockDim = 8;
+  
+  ushort2 blockRoot = gid / blockDim;
+  uint blocki = coords_to_offset(blockDim, blockRoot);
+  ushort2 blockRootCoords = blockRoot * blockDim;
+  ushort2 offsetFromBlockRootCoords = gid - blockRootCoords;
+  ushort offsetFromBlockRoot = coords_to_offset(blockDim, offsetFromBlockRootCoords);
+  
+  uint offsetFromBlockByBlockRoot = (blocki * blockDim * blockDim) + offsetFromBlockRoot;
+  ushort2 readCoords = offset_to_coords(rtd.width, offsetFromBlockByBlockRoot);
+  
+  half value = inTexture.read(readCoords).x;
   half4 outGrayscale = half4(value, value, value, 1.0h);
   return outGrayscale;
 }
