@@ -95,7 +95,7 @@ samplingCropShader(RasterizerData in [[stage_in]],
   const ushort blockDim = 8;
   
   ushort2 blockRoot = gid / blockDim;
-  uint blocki = coords_to_offset(blockDim, blockRoot);
+  uint blocki = coords_to_offset(rtd.blockWidth, blockRoot);
   ushort2 blockRootCoords = blockRoot * blockDim;
   ushort2 offsetFromBlockRootCoords = gid - blockRootCoords;
   ushort offsetFromBlockRoot = coords_to_offset(blockDim, offsetFromBlockRootCoords);

@@ -584,7 +584,7 @@ const static unsigned int blockDim = 8;
     self = [super init];
     if(self)
     {
-      isCaptureRenderedTextureEnabled = 1;
+      isCaptureRenderedTextureEnabled = 0;
       
       mtkView.depthStencilPixelFormat = MTLPixelFormatInvalid;
       
@@ -631,7 +631,7 @@ const static unsigned int blockDim = 8;
 //      hcfg = TEST_6x4_NOT_SQUARE;
 //      hcfg = TEST_8x8_IDENT;
 //      hcfg = TEST_8x8_DELTA_IDENT;
-      hcfg = TEST_16x8_IDENT;
+//      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
 //      hcfg = TEST_16x16_IDENT2;
 //      hcfg = TEST_16x16_IDENT3;
@@ -643,7 +643,7 @@ const static unsigned int blockDim = 8;
       //hcfg = TEST_IMAGE1;
       //hcfg = TEST_IMAGE2;
       //hcfg = TEST_IMAGE3;
-      //hcfg = TEST_IMAGE4;
+      hcfg = TEST_IMAGE4;
       
       ImageInputFrame *renderFrame = [ImageInputFrame frameForConfig:hcfg];
       
@@ -897,9 +897,9 @@ const static unsigned int blockDim = 8;
 /// Called whenever the view needs to render a frame
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
-  if (_outBlockOrderSymbolsData == nil) {
-    return;
-  }
+//  if (_outBlockOrderSymbolsData == nil) {
+//    return;
+//  }
   
   // Create a new command buffer
   
@@ -1003,7 +1003,7 @@ const static unsigned int blockDim = 8;
                            atIndex:AAPLVertexInputIndexVertices];
     
     [renderEncoder setFragmentTexture:_render_texture
-                              atIndex:AAPLTextureIndexes];
+                              atIndex:AAPLTextureIndexBaseColor];
     
     // Draw the 3 vertices of our triangle
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
@@ -1141,7 +1141,7 @@ const static unsigned int blockDim = 8;
       
       // Compare output to expected output
       
-      if ((0)) {
+      if ((1)) {
         NSData *expectedData = _imageInputBytes;
         assert(expectedData);
         uint8_t *expectedDataPtr = (uint8_t *) expectedData.bytes;
@@ -1204,6 +1204,8 @@ const static unsigned int blockDim = 8;
           }
           fprintf(stdout, "\n");
         }
+        
+        fprintf(stdout, "done\n");
       }
     }
     

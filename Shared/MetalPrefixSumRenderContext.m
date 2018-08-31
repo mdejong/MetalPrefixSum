@@ -86,7 +86,7 @@
                    blockSize:(CGSize)blockSize
                  renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
 {
-  const BOOL debug = TRUE;
+  const BOOL debug = FALSE;
   
   unsigned int width = renderSize.width;
   unsigned int height = renderSize.height;
@@ -422,7 +422,7 @@
                         level:(int)level
                    isExclusive:(BOOL)isExclusive
 {
-  const BOOL debug = false;
+  const BOOL debug = FALSE;
   
   if (debug) {
     NSLog(@"renderPrefixSumSweep inputTexture1: %4d x %4d and inputTexture2: %4d x %4d and outputTexture: %4d x %4d at level %d", (int)inputTexture1.width, (int)inputTexture1.height, (int)inputTexture2.width, (int)inputTexture2.height, (int)outputTexture.width, (int)outputTexture.height, level);
@@ -512,7 +512,7 @@
              renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
              isExclusive:(BOOL)isExclusive
 {
-  const BOOL debug = TRUE;
+  const BOOL debug = FALSE;
   
   // Determine how to recurse based on configuration in renderFrame
   
