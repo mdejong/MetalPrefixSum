@@ -89,7 +89,7 @@ const static unsigned int blockDim = 8;
   id<MTLBuffer> _bitsBuff;
   
     // The number of vertices in our vertex buffer
-    NSUInteger _numVertices;
+    //NSUInteger _numVertices;
 
     // The current size of our view so we can use this in our render pipeline
     vector_uint2 _viewportSize;
@@ -629,7 +629,7 @@ const static unsigned int blockDim = 8;
 //      hcfg = TEST_4x8_INCREASING1;
 //      hcfg = TEST_2x8_INCREASING1;
 //      hcfg = TEST_6x4_NOT_SQUARE;
-//      hcfg = TEST_8x8_IDENT;
+      hcfg = TEST_8x8_IDENT;
 //      hcfg = TEST_8x8_DELTA_IDENT;
 //      hcfg = TEST_16x8_IDENT;
 //      hcfg = TEST_16x16_IDENT;
@@ -643,7 +643,7 @@ const static unsigned int blockDim = 8;
       //hcfg = TEST_IMAGE1;
       //hcfg = TEST_IMAGE2;
       //hcfg = TEST_IMAGE3;
-      hcfg = TEST_IMAGE4;
+      //hcfg = TEST_IMAGE4;
       
       ImageInputFrame *renderFrame = [ImageInputFrame frameForConfig:hcfg];
       
@@ -972,7 +972,7 @@ const static unsigned int blockDim = 8;
     // Draw the 3 vertices of our triangle
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
                       vertexStart:0
-                      vertexCount:_numVertices];
+                      vertexCount:self.mrc.identityNumVertices];
     
     [renderEncoder popDebugGroup]; // RenderToTexture
     
@@ -1008,7 +1008,7 @@ const static unsigned int blockDim = 8;
     // Draw the 3 vertices of our triangle
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
                       vertexStart:0
-                      vertexCount:_numVertices];
+                      vertexCount:self.mrc.identityNumVertices];
     
     [renderEncoder popDebugGroup]; // RenderFromTexture
    
@@ -1031,7 +1031,7 @@ const static unsigned int blockDim = 8;
       
       // Dump contents of prefix sum render output
       
-      const BOOL debug = FALSE;
+      const BOOL debug = TRUE;
       
       id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
       
@@ -1056,7 +1056,7 @@ const static unsigned int blockDim = 8;
       int cmp = memcmp(bytePtr, texturePtr, _blockOrderSymbolsPreDeltas.length);
       assert(cmp == 0);
     }
-        
+    
     // Capture the render to texture state at the render to size
     if (isCaptureRenderedTextureEnabled && 1) {
       // Query output texture
@@ -1073,7 +1073,7 @@ const static unsigned int blockDim = 8;
       
       // Dump output words as BGRA
       
-      if ((0)) {
+      if ((1)) {
         // Dump 24 bit values as int
         
         fprintf(stdout, "_render_texture\n");
@@ -1114,7 +1114,7 @@ const static unsigned int blockDim = 8;
         fprintf(stdout, "done\n");
       }
       
-      if ((0)) {
+      if ((1)) {
         // Dump 24 bit values as int
         
         fprintf(stdout, "expected symbols\n");
