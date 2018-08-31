@@ -697,8 +697,9 @@ const static unsigned int blockDim = 8;
       // together. Pass (32,32) for a 3x * 32 values per block.
       
       CGSize prefixSumBlockSize = CGSizeMake(width, height);
+      CGSize blockSize = CGSizeMake(width, height);
       
-      [self.mpsrc setupRenderTextures:self.mrc renderSize:prefixSumBlockSize renderFrame:mpsrf];
+      [self.mpsrc setupRenderTextures:self.mrc renderSize:prefixSumBlockSize blockSize:blockSize renderFrame:mpsrf];
       
       self.mpsRenderFrame = mpsrf;
       

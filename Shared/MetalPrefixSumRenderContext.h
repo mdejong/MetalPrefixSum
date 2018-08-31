@@ -51,6 +51,7 @@
                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
                   inputTexture:(id<MTLTexture>)inputTexture
                  outputTexture:(id<MTLTexture>)outputTexture
+          sameDimTargetTexture:(id<MTLTexture>)sameDimTargetTexture
                          level:(int)level;
 
 // Prefix sum sweep, this executes a single sweep step

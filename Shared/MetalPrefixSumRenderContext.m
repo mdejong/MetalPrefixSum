@@ -97,8 +97,10 @@
   renderFrame.width = width;
   renderFrame.height = height;
   
-  // blockDim is known to be a POT, so it can be treated as
-  // always being a POT in shader logic.
+  // blockDim is the number of elements in a processing block.
+  // For example, a 2x2 block has a blockDim of 4 while
+  // a 2x4 block has a blockDim of 8. A blockDim is known to
+  // be a POT, so it can be treated as such in shader code.
   
   unsigned int blockDim = blockSize.width * blockSize.height;
   
@@ -108,13 +110,28 @@
   
   renderFrame.blockDim = blockDim;
   
+  // Determine the number of blocks in the input image width
+  // along with the number of blocks in the height. The input
+  // image need not be a square.
+  
+#if defined(DEBUG)
+  assert((width % blockWidth) == 0);
+  assert((height % blockHeight) == 0);
+#endif // DEBUG
+  
+  unsigned int numBlocksInWidth = width / blockWidth;
+  unsigned int numBlocksInHeight = height / blockHeight;
+  
+  renderFrame.numBlocksInWidth = numBlocksInWidth;
+  renderFrame.numBlocksInHeight = numBlocksInHeight;
+  
   // The number of flat blocks that fits into (width * height) is
   // constant while the texture dimension is being reduced.
   
-  unsigned int numBlocksInImage = (width * height) / blockDim;
-  
 #if defined(DEBUG)
   assert(((width * height) % blockDim) == 0);
+  unsigned int numBlocksInImage = (width * height) / blockDim;
+  assert(numBlocksInImage == (numBlocksInWidth * numBlocksInHeight));
 #endif // DEBUG
   
   // Texture that holds block order input bytes
@@ -146,44 +163,57 @@
   renderFrame.reduceTextures = [NSMutableArray array];
   renderFrame.sweepTextures = [NSMutableArray array];
   
-  int textureWidth = blockWidth;
-  int textureHeight = blockHeight;
-  
-  // Create a single output texture at 1/2 the height
+  // For each reduction step, the output number of pixels is 1/2 the input
   
   int pot = 1;
   
   const int maxNumReductions = log2(4096);
   
+  int reducedBlockWidth = blockWidth;
+  int reducedBlockHeight = blockHeight;
+  
+  if (debug) {
+    NSLog(@"block  texture %3d x %3d", reducedBlockWidth, reducedBlockHeight);
+  }
+  
   unsigned int actualWidth = width;
   unsigned int actualHeight = height;
   
   for (int i = 0; i < maxNumReductions; i++) {
-    if (actualWidth == actualHeight) {
+    if (reducedBlockWidth == reducedBlockHeight) {
       // square texture to rect of 1/2 the width
-      actualWidth /= 2;
+#if defined(DEBUG)
+      assert(reducedBlockWidth > 1);
+#endif // DEBUG
+      reducedBlockWidth /= 2;
     } else {
       // rect texture to square that is 1/2 the height
-      actualHeight /= 2;
+#if defined(DEBUG)
+      assert(reducedBlockHeight > 1);
+#endif // DEBUG
+      reducedBlockHeight /= 2;
     }
     
-    if (textureWidth == textureHeight) {
-      // square texture to rect of 1/2 the width
-      textureWidth /= 2;
-    } else {
-      // rect texture to square that is 1/2 the height
-      textureHeight /= 2;
-    }
+    // Calculate actualWidth x actualHeight based on block dimensions.
+    // Note the edge case where an input block like 2x2 (POT = 4)
+    // would get reduced to 1x2 in the first reduction step, if
+    // the input texture size is 
     
-    if (textureWidth == 1 && textureHeight == 1) {
+    // In an edge case like 2x2 being reduced to 1x2, the width of
+    // the output texture would be 1
+    
+    actualWidth = reducedBlockWidth * numBlocksInWidth;
+    actualHeight = reducedBlockHeight * numBlocksInHeight;
+    
+    if (reducedBlockWidth == 1 && reducedBlockHeight == 1) {
       break;
     }
     
     int reduceStep = i + 1;
     
     if (debug) {
-      NSLog(@"reduction %d : POT %d", reduceStep, pot);
-      NSLog(@"block  texture %3d x %3d", textureWidth, textureHeight);
+      NSLog(@"reduction/sweep %d : POT %d", reduceStep, pot);
+      NSLog(@"block  texture %3d x %3d", reducedBlockWidth, reducedBlockHeight);
       NSLog(@"actual texture %3d x %3d", actualWidth, actualHeight);
     }
     
@@ -193,17 +223,9 @@
 
     [renderFrame.reduceTextures addObject:txt];
     
-    if (debug) {
-      NSLog(@"sweep     %d : POT %d", reduceStep, pot);
-      NSLog(@"block  texture %3d x %3d", textureWidth, textureHeight);
-      NSLog(@"actual texture %3d x %3d", actualWidth, actualHeight);
-    }
-    
     txt = [mrc make8bitTexture:CGSizeMake(actualWidth, actualHeight) bytes:NULL usage:MTLTextureUsageRenderTarget|MTLTextureUsageShaderRead];
     
     [renderFrame.sweepTextures addObject:txt];
-    
-    // FIXME: allocate target dimension buffer to pass in POT ?
     
     pot *= 2;
   }
@@ -213,8 +235,9 @@
   {
     id<MTLTexture> txt;
     
-    assert(textureWidth == 1);
-    assert(textureHeight == 1);
+    // The reductions above must have generated a block width of 1x1
+    assert(reducedBlockWidth == 1);
+    assert(reducedBlockHeight == 1);
     
     txt = [mrc make8bitTexture:CGSizeMake(actualWidth, actualHeight) bytes:NULL usage:MTLTextureUsageShaderRead];
     
@@ -231,8 +254,11 @@
   
   {
     RenderTargetDimensionsAndBlockDimensionsUniform *ptr = renderFrame.renderTargetDimensionsAndBlockDimensionsUniform.contents;
-    ptr->width = renderFrame.width;
-    ptr->height = renderFrame.height;
+    // pass numBlocksInWidth
+    ptr->width = renderFrame.numBlocksInWidth;
+    // pass numBlocksInHeight
+    ptr->height = renderFrame.numBlocksInHeight;
+    // pass (blockSide * blockSide) as a POT
     ptr->blockWidth = renderFrame.blockDim;
     ptr->blockHeight = renderFrame.blockDim;
   }
@@ -310,6 +336,7 @@
                    renderFrame:(MetalPrefixSumRenderFrame*)renderFrame
                   inputTexture:(id<MTLTexture>)inputTexture
                  outputTexture:(id<MTLTexture>)outputTexture
+          sameDimTargetTexture:(id<MTLTexture>)sameDimTargetTexture
                          level:(int)level
 {
   const BOOL debug = TRUE;
@@ -332,15 +359,12 @@
     // Output of a square reduce is 1/2 the width
     // Output of a rect reduce is 1/2 the height
     
-    if (inputTexture.width == inputTexture.height) {
-      // reduce square
-      assert((inputTexture.width / 2) == outputTexture.width);
-      assert(inputTexture.height == outputTexture.height);
-    } else {
-      // reduce rect
-      assert(inputTexture.width == outputTexture.width);
-      assert((inputTexture.height / 2) == outputTexture.height);
-    }
+    // In either case, the number of pixels in the render output must be 1/2
+    
+    int inputNumPixels = (int)inputTexture.width * (int)inputTexture.height;
+    int outputNumPixels = (int)outputTexture.width * (int)outputTexture.height;
+    
+    assert(inputNumPixels == (outputNumPixels * 2));
 #endif // DEBUG
     
     renderPassDescriptor.colorAttachments[0].texture = outputTexture;
@@ -370,6 +394,7 @@
                            atIndex:AAPLVertexInputIndexVertices];
     
     [renderEncoder setFragmentTexture:inputTexture atIndex:0];
+    [renderEncoder setFragmentTexture:sameDimTargetTexture atIndex:1];
     
     [renderEncoder setFragmentBuffer:renderFrame.renderTargetDimensionsAndBlockDimensionsUniform
                               offset:0
@@ -420,15 +445,12 @@
     assert(inputTexture2.width == outputTexture.width);
     assert(inputTexture2.height == outputTexture.height);
     
-    if (inputTexture1.width == inputTexture1.height) {
-      // square
-      assert(inputTexture1.width == outputTexture.width);
-      assert((inputTexture1.height * 2) == outputTexture.height);
-    } else {
-      // rect
-      assert((inputTexture1.width * 2) == outputTexture.width);
-      assert(inputTexture1.height == outputTexture.height);
-    }
+    // In either case, the number of pixels doubles on a up sweep
+    
+    int inputNumPixels = (int)inputTexture1.width * (int)inputTexture1.height;
+    int outputNumPixels = (int)outputTexture.width * (int)outputTexture.height;
+    
+    assert((inputNumPixels * 2) == outputNumPixels);
 #endif // DEBUG
     
     renderPassDescriptor.colorAttachments[0].texture = outputTexture;
@@ -509,6 +531,12 @@
     
     for (int i = 0; i < maxStep; i++) {
       id<MTLTexture> outputTexture = renderFrame.reduceTextures[i];
+      id<MTLTexture> sameDimTargetTexture = renderFrame.sweepTextures[i];
+      
+#if defined(DEBUG)
+      assert(outputTexture.width == sameDimTargetTexture.width);
+      assert(outputTexture.height == sameDimTargetTexture.height);
+#endif // DEBUG
       
       if (debug) {
         NSLog(@"reduce step   : %d uses reduceTextures[%2d] and reduceTextures[%2d]", i+1, i-1, i);        
@@ -521,6 +549,7 @@
                       renderFrame:renderFrame
                      inputTexture:inputTexture
                     outputTexture:outputTexture
+             sameDimTargetTexture:sameDimTargetTexture
                             level:i+1];
       
       inputTexture = outputTexture;

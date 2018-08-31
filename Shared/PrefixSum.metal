@@ -91,29 +91,20 @@ typedef struct
 fragment half
 fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
                               texture2d<half, access::read> inTexture [[ texture(0) ]],
+                              texture2d<half, access::read> sameDimTargetTexture [[ texture(1) ]],
                               constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
 {
-  ushort2 renderSize;
-  
-  // FIXME: pass output render size in rtd ?
-  
-  if (inTexture.get_width() == inTexture.get_height()) {
-    // Reduce Square
-    renderSize = ushort2(inTexture.get_width() / 2, inTexture.get_height());
-  } else {
-    // Reduce Rect
-    renderSize = ushort2(inTexture.get_width(), inTexture.get_height() / 2);
-  }
-  
+  ushort2 renderSize = ushort2(sameDimTargetTexture.get_width(), sameDimTargetTexture.get_height());
   ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
   
   uint gidOffset1 = coords_to_offset(renderSize.x, gid);
   gidOffset1 *= 2;
   
+  uint gidOffset2 = gidOffset1 + 1;
+  
   // Convert to (X,Y) coords in terms of input width
   ushort2 b1Coords = offset_to_coords(inTexture.get_width(), gidOffset1);
-  ushort2 b2Coords = b1Coords;
-  b2Coords.x += 1;
+  ushort2 b2Coords = offset_to_coords(inTexture.get_width(), gidOffset2);
   
   uint8_t b1 = uint8_from_half(inTexture.read(b1Coords).x);
   uint8_t b2 = uint8_from_half(inTexture.read(b2Coords).x);
@@ -140,27 +131,20 @@ fragmentShaderPrefixSumReduce(RasterizerData in [[stage_in]],
 fragment half
 fragmentShaderPrefixSumReduceA7(RasterizerData in [[stage_in]],
                                 texture2d<half, access::read> inTexture [[ texture(0) ]],
+                                texture2d<half, access::read> sameDimTargetTexture [[ texture(1) ]],
                                 constant RenderTargetDimensionsAndBlockDimensionsUniform & rtd [[ buffer(0) ]])
 {
-  ushort2 renderSize;
-  
-  if (inTexture.get_width() == inTexture.get_height()) {
-    // Reduce Square
-    renderSize = ushort2(inTexture.get_width() / 2, inTexture.get_height());
-  } else {
-    // Reduce Rect
-    renderSize = ushort2(inTexture.get_width(), inTexture.get_height() / 2);
-  }
-  
+  ushort2 renderSize = ushort2(sameDimTargetTexture.get_width(), sameDimTargetTexture.get_height());
   ushort2 gid = calc_gid_from_frag_norm_coord(renderSize, in.textureCoordinate);
   
   uint gidOffset1 = coords_to_offset(renderSize.x, gid);
   gidOffset1 *= 2;
   
+  uint gidOffset2 = gidOffset1 + 1;
+  
   // Convert to (X,Y) coords in terms of input width
   ushort2 b1Coords = offset_to_coords(inTexture.get_width(), gidOffset1);
-  ushort2 b2Coords = b1Coords;
-  b2Coords.x += 1;
+  ushort2 b2Coords = offset_to_coords(inTexture.get_width(), gidOffset2);
   
   uint8_t b1 = uint8_from_half(inTexture.read(b1Coords).x);
   uint8_t b2 = uint8_from_half(inTexture.read(b2Coords).x);
@@ -332,7 +316,6 @@ fragmentShaderPrefixSumInclusiveDownSweep(RasterizerData in [[stage_in]],
 
   t2Offset += 1;
 
-  // FIXME: does compile see (N % POT) as optimization like & (POT - 1) ???
   //bool isLastOne = ((t2Offset % rtd.blockWidth) == 0);
   bool isLastOne = ((t2Offset & (rtd.blockWidth - 1)) == 0);
   

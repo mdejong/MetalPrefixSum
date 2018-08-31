@@ -21,14 +21,15 @@
 // must be properly set so that width x height is always
 // in terms of a multiple of blockDim.
 
-@property (nonatomic, assign) int width;
-@property (nonatomic, assign) int height;
+@property (nonatomic, assign) NSUInteger width;
+@property (nonatomic, assign) NSUInteger height;
+
+@property (nonatomic, assign) NSUInteger numBlocksInWidth;
+@property (nonatomic, assign) NSUInteger numBlocksInHeight;
+
+// The square dimensions of a block at the original image dimensions
 
 @property (nonatomic, assign) NSUInteger blockDim;
-
-// The original input image order in image order
-
-//@property (nonatomic, retain) id<MTLTexture> inputImageOrderTexture;
 
 // The original input image order in block order
 

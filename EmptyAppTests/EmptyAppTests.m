@@ -171,6 +171,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 2);
   XCTAssert(outputTexture.height == 4);
@@ -191,7 +192,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -247,6 +248,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 2);
   XCTAssert(outputTexture.height == 2);
@@ -267,7 +269,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -325,6 +327,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 2);
   XCTAssert(outputTexture.height == 2);
@@ -345,7 +348,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -405,6 +408,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[1];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[1];
   
   XCTAssert(inputTexture.width == 2);
   XCTAssert(inputTexture.height == 4);
@@ -428,7 +432,7 @@
   
   // Reduce second step
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:2];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:2];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -482,6 +486,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 1);
   XCTAssert(outputTexture.height == 2);
@@ -502,7 +507,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -605,6 +610,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 16);
   XCTAssert(outputTexture.height == 32);
@@ -625,7 +631,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -742,6 +748,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 16);
   XCTAssert(outputTexture.height == 16);
@@ -762,7 +769,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -856,6 +863,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 8);
   XCTAssert(outputTexture.height == 16);
@@ -876,7 +884,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -969,6 +977,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 8);
   XCTAssert(outputTexture.height == 8);
@@ -989,7 +998,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1082,6 +1091,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 4);
   XCTAssert(outputTexture.height == 8);
@@ -1102,7 +1112,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -1195,6 +1205,7 @@
   
   id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
   id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  id<MTLTexture> sameDimTargetTexture = (id<MTLTexture>) mpsrf.sweepTextures[0];
   
   XCTAssert(outputTexture.width == 4);
   XCTAssert(outputTexture.height == 4);
@@ -1215,7 +1226,7 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture sameDimTargetTexture:sameDimTargetTexture level:1];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -2045,6 +2056,9 @@
 
   XCTAssert(outputTexture1 != outputTexture2);
   
+  id<MTLTexture> sameDimTargetTexture1 = (id<MTLTexture>) mpsrf.sweepTextures[0];
+  id<MTLTexture> sameDimTargetTexture2 = (id<MTLTexture>) mpsrf.sweepTextures[1];
+  
   // fill inputTexture
   
   [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
@@ -2083,9 +2097,9 @@
   
   // Prefix sum setup and render steps
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture1 level:1];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:inputTexture outputTexture:outputTexture1 sameDimTargetTexture:sameDimTargetTexture1 level:1];
   
-  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:outputTexture1 outputTexture:outputTexture2 level:2];
+  [mpsrc renderPrefixSumReduce:mrc commandBuffer:commandBuffer renderFrame:mpsrf inputTexture:outputTexture1 outputTexture:outputTexture2 sameDimTargetTexture:sameDimTargetTexture2 level:2];
   
   // Wait for commands to be rendered
   [commandBuffer commit];
@@ -2639,9 +2653,9 @@
   XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
 }
 
-// Prefix sum of 2 blocks of size 2x2
+// Prefix sum of 2 blocks of size 2x2, input 2x4
 
-- (void)testMetalFullPrefixSum2x2WithTwoBlocks {
+- (void)testMetalFullPrefixSum2x2WithTwoBlocks2x4 {
   // Two 2x2 blocks in block by block order
   NSArray *expectedInputArr = @[
                                 @(0), @(1), @(2), @(3),
@@ -2707,6 +2721,139 @@
   
   if (dump) {
     [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  // Print each reduce output texture
+  
+  {
+    for ( int offset = 0 ; offset < (int)mpsrf.reduceTextures.count; offset += 1 ) {
+      id<MTLTexture> outputTexture = mpsrf.reduceTextures[offset];
+      
+      if (dump) {
+        int level = offset + 1;
+        NSString *levelStr = [NSString stringWithFormat:@"reduceTextureL%d", level];
+        [self dump8BitTexture:outputTexture label:levelStr];
+      }
+    }
+  }
+  
+  {
+    for ( int offset = (int)mpsrf.sweepTextures.count - 1 ; offset >= 0; offset -= 1 ) {
+      id<MTLTexture> outputTexture = mpsrf.sweepTextures[offset];
+      
+      if (dump) {
+        int level = offset + 1;
+        NSString *levelStr = [NSString stringWithFormat:@"sweepTextureL%d", level];
+        [self dump8BitTexture:outputTexture label:levelStr];
+      }
+    }
+  }
+  
+  if (dump) {
+    [self dump8BitTexture:outputTexture label:@"outputTexture"];
+  }
+  
+  NSArray *inputArr = [self arrayFrom8BitTexture:inputTexture];
+  NSArray *renderedArr = [self arrayFrom8BitTexture:outputTexture];
+  
+  XCTAssert([inputArr isEqualToArray:expectedInputArr]);
+  XCTAssert([renderedArr isEqualToArray:expectedRenderedArr]);
+}
+
+// Prefix sum of 2 blocks of size 2x2, input 4x2
+
+- (void)testMetalFullPrefixSum2x2WithTwoBlocks4x2 {
+  // Two 2x2 blocks in block by block order
+  NSArray *expectedInputArr = @[
+                                @(0), @(1), @(2), @(3),
+                                @(10), @(11), @(12), @(13)
+                                ];
+  
+  NSArray *expectedRenderedArr = @[
+                                   @(0), @(0), @(0+1), @(0+1+2),
+                                   @(0), @(10), @(10+11), @(10+11+12)
+                                   ];
+  
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  
+  MetalRenderContext *mrc = [[MetalRenderContext alloc] init];
+  
+  MetalPrefixSumRenderContext *mpsrc = [[MetalPrefixSumRenderContext alloc] init];
+  
+  [mrc setupMetal:device];
+  
+  [mpsrc setupRenderPipelines:mrc];
+  
+  MetalPrefixSumRenderFrame *mpsrf = [[MetalPrefixSumRenderFrame alloc] init];
+  
+  CGSize renderSize = CGSizeMake(4, 2);
+  CGSize blockSize = CGSizeMake(2, 2);
+  
+  [mpsrc setupRenderTextures:mrc renderSize:renderSize blockSize:blockSize renderFrame:mpsrf];
+  
+  id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+  id<MTLTexture> outputTexture = (id<MTLTexture>) mpsrf.outputBlockOrderTexture;
+  
+  XCTAssert(inputTexture.width == 4);
+  XCTAssert(inputTexture.height == 2);
+  
+  XCTAssert(outputTexture.width == 4);
+  XCTAssert(outputTexture.height == 2);
+  
+  // fill inputTexture
+  
+  [self fill8BitTexture:inputTexture bytesArray:expectedInputArr mrc:mrc];
+  
+  // Get a metal command buffer
+  
+  id <MTLCommandBuffer> commandBuffer = [mrc.commandQueue commandBuffer];
+  
+#if defined(DEBUG)
+  assert(commandBuffer);
+#endif // DEBUG
+  
+  commandBuffer.label = @"XCTestRenderCommandBuffer";
+  
+  // Prefix sum setup and render steps
+  
+  [mpsrc renderPrefixSum:mrc commandBuffer:commandBuffer renderFrame:mpsrf isExclusive:TRUE];
+  
+  // Wait for commands to be rendered
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+  
+  // Dump output of render process
+  
+  BOOL dump = TRUE;
+  
+  if (dump) {
+    [self dump8BitTexture:inputTexture label:@"inputTexture"];
+  }
+  
+  // Print each reduce output texture
+  
+  {
+    for ( int offset = 0 ; offset < (int)mpsrf.reduceTextures.count; offset += 1 ) {
+      id<MTLTexture> outputTexture = mpsrf.reduceTextures[offset];
+      
+      if (dump) {
+        int level = offset + 1;
+        NSString *levelStr = [NSString stringWithFormat:@"reduceTextureL%d", level];
+        [self dump8BitTexture:outputTexture label:levelStr];
+      }
+    }
+  }
+  
+  {
+    for ( int offset = (int)mpsrf.sweepTextures.count - 1 ; offset >= 0; offset -= 1 ) {
+      id<MTLTexture> outputTexture = mpsrf.sweepTextures[offset];
+      
+      if (dump) {
+        int level = offset + 1;
+        NSString *levelStr = [NSString stringWithFormat:@"sweepTextureL%d", level];
+        [self dump8BitTexture:outputTexture label:levelStr];
+      }
+    }
   }
   
   if (dump) {
@@ -2964,6 +3111,18 @@
   
   XCTAssert(outputTexture.width == 2);
   XCTAssert(outputTexture.height == 4);
+  
+  // The first reduction step reduces from 2x4 to 2x2 and not to 1x4
+  // since a width of 1 complicates shader math.
+  
+  id<MTLTexture> reduction1Texture = (id<MTLTexture>) mpsrf.reduceTextures[0];
+  XCTAssert(reduction1Texture.width == 1);
+  XCTAssert(reduction1Texture.height == 4);
+  
+  id<MTLTexture> zerosTexture = (id<MTLTexture>) mpsrf.zeroTexture;
+  
+  XCTAssert(zerosTexture.width == 1);
+  XCTAssert(zerosTexture.height == 2);
   
   // fill inputTexture
   
