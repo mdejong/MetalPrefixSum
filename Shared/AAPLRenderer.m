@@ -773,6 +773,21 @@ const static unsigned int blockDim = 8;
       
       [self setupBlockEncoding];
       
+      // Init input texture to prefix sum operation
+      
+      if ((1))
+      {
+        // Copy prefix sum delta input bytes into block order texture
+        id<MTLTexture> inputTexture = (id<MTLTexture>) mpsrf.inputBlockOrderTexture;
+        
+        NSAssert(_outBlockOrderSymbolsData, @"_outBlockOrderSymbolsData");
+        
+        // Convert deltas from zigzag back to plain deltas, then sum to undo deltas
+        
+        //NSData *decodedDeltas = [DeltaEncoder decodeZigZagBytes:_outBlockOrderSymbolsData];
+        [self.mrc fill8bitTexture:inputTexture bytes:(uint8_t*)_outBlockOrderSymbolsData.bytes];
+      }
+      
     } // end of init if block
   
     return self;
@@ -921,6 +936,7 @@ const static unsigned int blockDim = 8;
   
   id<MTLTexture> prefixSumOutputTexture = (id<MTLTexture>) mpsRenderFrame.outputBlockOrderTexture;
   
+  if ((0))
   {
     // Copy prefix sum delta input bytes into block order texture
     id<MTLTexture> inputTexture = (id<MTLTexture>) mpsRenderFrame.inputBlockOrderTexture;
