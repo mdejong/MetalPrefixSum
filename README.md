@@ -4,7 +4,7 @@ A GPU based parallel prefix sum implementation that operates on byte values. Sup
 
 ## Overview
 
-This project demonstrates how Metal can be used to implement code to apply a delta to image data.
+This project demonstrates how Metal can be used to implement code to apply a delta to image data. Processes 8x8 blocks by default.
 
 ## Status
 
@@ -12,7 +12,7 @@ This encoder/decoder implementation of GPU based delta is a test of parallel blo
 
 ## Decoding Speed
 
-Please note that current results indicate decoding on the CPU is significantly faster than decoding on the GPU, since each decoding step in a block has to wait until the previous one has completed. Processing blocks in parallel does not appear to be competitive when compared to executing on the CPU.
+Currently, the 2D fragment shader based implementation is not fast enough to process full screen video at 30 FPS.
 
 ## Implementation
 
